@@ -25,15 +25,25 @@
     --shadow: 0 4px 24px rgba(79,70,229,0.08);
     --radius: 14px;
     --radius-sm: 8px;
+    --board-panel-height: 280px;
+    --topnav-h: 64px;
+    --bottom-bar-h: 72px;
+    --main-h: calc(100vh - var(--topnav-h) - var(--bottom-bar-h));
     --transition: all 0.22s cubic-bezier(.4,0,.2,1);
+  }
+  html, body {
+    height: 100%;
+    overflow: hidden;
   }
   body {
     font-family: 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
+    height: 100vh;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
   }
 
   /* ===== Scrollbar ===== */
@@ -55,6 +65,7 @@
     top: 0;
     z-index: 100;
     flex-wrap: wrap;
+    flex-shrink: 0;
   }
   #topnav .logo {
     font-size: 1.1rem;
@@ -134,29 +145,79 @@
   /* ===== Main Layout ===== */
   #main {
     display: flex;
-    flex: 1;
+    flex: 0 0 auto;
     gap: 0;
     overflow: hidden;
-    height: calc(100vh - 64px);
+    min-height: 0;
+    height: var(--main-h);
+    max-height: var(--main-h);
   }
   #content-area {
-    flex: 1;
-    overflow-y: auto;
+    flex: 1 1 auto;
+    overflow-y: scroll;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    -webkit-overflow-scrolling: touch;
     padding: 24px;
     display: flex;
     flex-direction: column;
     gap: 16px;
+    scrollbar-width: auto;
+    scrollbar-color: #6366f1 #e2e8f0;
+    scrollbar-gutter: stable;
   }
+  #content-area::-webkit-scrollbar { width: 12px; }
+  #content-area::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 99px; }
+  #content-area::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 99px; }
   #sidebar {
     width: 280px;
     min-width: 220px;
+    flex-shrink: 0;
     background: var(--bg-card);
     border-left: 1px solid var(--border);
-    overflow-y: auto;
-    padding: 20px 16px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    padding: 12px 12px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 10px;
+    position: relative;
+    top: auto;
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+    scrollbar-width: thin;
+    scrollbar-color: #a5b4fc transparent;
+  }
+  #sidebar::-webkit-scrollbar { width: 10px; }
+  #sidebar::-webkit-scrollbar-thumb { background: #a5b4fc; border-radius: 99px; }
+  #sidebar::-webkit-scrollbar-track { background: transparent; }
+  #audioControls {
+    position: static;
+    top: auto;
+    z-index: 8;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px;
+    margin-bottom: 0;
+    max-height: none;
+    display: flex;
+    flex-direction: column;
+  }
+  #audioControls .sidebar-title { margin-bottom: 8px; }
+  #audioControlsScroll {
+    min-height: auto;
+    overflow-y: visible;
+    padding-right: 0;
+    margin-right: 0;
+  }
+  #audioControlsActions {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border);
+    flex-shrink: 0;
   }
 
   /* ===== Cards ===== */
@@ -704,6 +765,7 @@
     align-items: center;
     gap: 12px;
     flex-wrap: wrap;
+    flex-shrink: 0;
     box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
   }
   #bottom-bar .btn-group { flex: 1; }
@@ -720,11 +782,13 @@
     padding: 28px 24px;
     color: #e8f5e8;
     font-family: 'Courier New', monospace;
-    min-height: 280px;
+    min-height: var(--board-panel-height);
+    height: var(--board-panel-height);
     border: 3px solid #2d4a2d;
     box-shadow: inset 0 2px 12px rgba(0,0,0,0.3), 0 4px 20px rgba(0,0,0,0.15);
     position: relative;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
   .blackboard::before {
     content: '';
@@ -762,8 +826,8 @@
   }
   .blackboard-textarea {
     width: 100%;
-    min-height: 280px;
-    height: 280px;
+    min-height: var(--board-panel-height);
+    height: var(--board-panel-height);
     background: #1a2e1a;
     border: 3px solid #2d4a2d;
     border-radius: var(--radius);
@@ -812,6 +876,36 @@
   /* ===== Mode Panels ===== */
   .mode-panel { display: none; }
   .mode-panel.active { display: block; }
+  #panel-read,
+  #panel-memo {
+    height: auto;
+    max-height: none;
+    min-height: 0;
+    overflow: visible;
+  }
+  #panel-read.mode-panel.active,
+  #panel-memo.mode-panel.active {
+    display: block;
+  }
+  #panel-read .card-body,
+  #panel-memo .card-body {
+    overflow: visible;
+  }
+  #readList,
+  #memoContent {
+    height: auto;
+    max-height: none;
+    overflow-y: visible;
+    min-height: 0;
+    scrollbar-width: thin;
+    scrollbar-color: #a5b4fc transparent;
+  }
+  #readList::-webkit-scrollbar,
+  #memoContent::-webkit-scrollbar { width: 8px; }
+  #readList::-webkit-scrollbar-thumb,
+  #memoContent::-webkit-scrollbar-thumb { background: #a5b4fc; border-radius: 99px; }
+  #readList::-webkit-scrollbar-track,
+  #memoContent::-webkit-scrollbar-track { background: transparent; }
 
   /* ===== Audio Visualizer ===== */
   .audio-indicator {
@@ -858,14 +952,49 @@
 
   /* ===== Responsive ===== */
   @media (max-width: 900px) {
-    #main { flex-direction: column; height: auto; overflow: visible; }
-    #sidebar { width: 100%; border-left: none; border-top: 1px solid var(--border); }
+    html, body {
+      height: auto;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+    #main { flex-direction: column; flex: 1 1 auto; height: auto; max-height: none; overflow: visible; }
+    #sidebar { width: 100%; border-left: none; border-top: 1px solid var(--border); position: static; top: auto; height: auto; max-height: none; overflow: visible; }
+    #audioControls {
+      position: static;
+      max-height: none;
+    }
+    #audioControlsScroll {
+      overflow-y: visible;
+      padding-right: 0;
+      margin-right: 0;
+    }
     .blackboard-layout { grid-template-columns: 1fr; }
     #topnav { height: auto; padding: 12px 16px; gap: 10px; }
     .lesson-switch { width: 100%; }
     .lesson-select { flex: 1; min-width: 0; }
     .mode-tabs { flex-wrap: wrap; }
-    #content-area { padding: 16px; }
+    #content-area { padding: 16px; height: auto; max-height: none; overflow: visible; }
+    #panel-read,
+    #panel-memo {
+      height: auto;
+      max-height: none;
+      min-height: 0;
+      overflow: visible;
+    }
+    #panel-read.mode-panel.active,
+    #panel-memo.mode-panel.active {
+      display: block;
+    }
+    #panel-read .card-body,
+    #panel-memo .card-body {
+      overflow: visible;
+    }
+    #readList,
+    #memoContent {
+      height: auto;
+      max-height: none;
+      overflow-y: visible;
+    }
   }
 
   /* ===== Lesson Header ===== */
@@ -889,7 +1018,50 @@
   }
   .lesson-header-badge-num { font-size: 1.8rem; font-weight: 800; }
   .lesson-header-badge-label { font-size: 0.72rem; opacity: 0.8; }
-
+  .lesson-audio-strip {
+    margin-top: 10px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 12px;
+  }
+  .lesson-audio-meta {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .lesson-audio-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .lesson-audio-btn {
+    border: none;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    background: var(--primary);
+    color: #fff;
+    cursor: pointer;
+  }
+  .lesson-audio-btn.secondary {
+    background: #1f2937;
+  }
+  .lesson-audio-track {
+    flex: 1;
+    min-width: 120px;
+  }
+  .lesson-audio-speed {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 5px 8px;
+    font-size: 0.8rem;
+    background: #fff;
+  }
   /* ===== Empty / Hint states ===== */
   .empty-hint {
     text-align: center;
@@ -920,7 +1092,6 @@
   </div>
   <div class="mode-tabs">
     <button class="mode-tab active" onclick="switchMode('read')" id="tab-read">📖 阅读</button>
-    <button class="mode-tab" onclick="switchMode('shadow')" id="tab-shadow">🎧 跟读</button>
     <button class="mode-tab" onclick="switchMode('memo')" id="tab-memo">🧠 背诵</button>
     <button class="mode-tab" onclick="switchMode('board')" id="tab-board">✏️ 板书</button>
   </div>
@@ -943,7 +1114,23 @@
         <div class="lesson-header-badge-label">句子总数</div>
       </div>
     </div>
-
+    <div class="lesson-audio-strip" id="lessonAudioStrip">
+      <div class="lesson-audio-meta">
+        <span id="lessonAudioFileLabel">原音：-</span>
+        <span id="lessonAudioTimeLabel">00:00 / 00:00</span>
+      </div>
+      <div class="lesson-audio-controls">
+        <button class="lesson-audio-btn" id="lessonAudioToggleBtn" onclick="toggleLessonAudioPlayPause()">▶ 原音播放</button>
+        <button class="lesson-audio-btn secondary" onclick="restartLessonAudio()">↺ 重播</button>
+        <input class="lesson-audio-track" id="lessonAudioTimeline" type="range" min="0" max="0" step="0.05" value="0" oninput="onLessonAudioTimelineInput()">
+        <select class="lesson-audio-speed" id="lessonAudioSpeedSelect" onchange="onLessonAudioSpeedChange()">
+          <option value="0.8">0.8x</option>
+          <option value="1" selected>1.0x</option>
+          <option value="1.25">1.25x</option>
+          <option value="1.5">1.5x</option>
+        </select>
+      </div>
+    </div>
     <!-- READ MODE -->
     <div class="mode-panel active card" id="panel-read">
       <div class="card-header">📖 阅读模式 <span class="audio-indicator hidden" id="audioIndicator">
@@ -954,13 +1141,6 @@
       </span></div>
       <div class="structure-guide" id="readStructureGuide"></div>
       <div class="card-body" id="readList"></div>
-    </div>
-
-    <!-- SHADOW MODE -->
-    <div class="mode-panel card" id="panel-shadow">
-      <div class="card-header">🎧 跟读模式</div>
-      <div class="structure-guide" id="shadowStructureGuide"></div>
-      <div class="card-body" id="shadowList"></div>
     </div>
 
     <!-- MEMO MODE -->
@@ -997,119 +1177,105 @@
     <!-- Audio Controls (Read/Shadow) -->
     <div class="sidebar-section" id="audioControls">
       <div class="sidebar-title">🎵 播放控制</div>
-      <div class="control-row">
-        <span class="control-label">自动播放</span>
-        <label class="toggle-switch">
-          <input type="checkbox" id="autoPlayToggle" onchange="toggleAutoPlay()">
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-      <div class="control-row">
-        <span class="control-label">单句循环</span>
-        <label class="toggle-switch">
-          <input type="checkbox" id="loopToggle" onchange="toggleLoop()">
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-      <div class="control-row">
-        <span class="control-label">显示翻译</span>
-        <label class="toggle-switch">
-          <input type="checkbox" id="showTransToggle" onchange="toggleTranslation()">
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-      <div style="margin-top:8px;">
-        <div class="control-label" style="margin-bottom:6px;">语速调节</div>
-        <div class="speed-slider-row">
-          <input class="speed-slider" id="speedSlider" type="range" min="0.6" max="1.8" step="0.05" value="1.0" oninput="onSpeedSliderInput()">
-          <span class="speed-value" id="speedValue">1.0x</span>
-        </div>
-      </div>
-      <div style="margin-top:8px;">
-        <div class="control-label" style="margin-bottom:6px;">点播方式</div>
-        <div class="playback-mode-btns">
-          <button class="playback-mode-btn active" id="pbMode-auto" onclick="setPlaybackMode('auto')">自动</button>
-          <button class="playback-mode-btn" id="pbMode-audio" onclick="setPlaybackMode('audio')">原音</button>
-          <button class="playback-mode-btn" id="pbMode-tts" onclick="setPlaybackMode('tts')">TTS</button>
-        </div>
-      </div>
-      <div class="tts-config">
-        <div class="control-label" style="margin-bottom:6px;">TTS 引擎（仅 MiniMax）</div>
-        <div class="tts-stack" id="minimaxTTSBox">
-          <input class="tts-input" id="minimaxApiKeyInput" type="password" placeholder="输入 MiniMax API Key" oninput="onMiniMaxApiKeyInput()">
-          <input class="tts-input" id="minimaxGroupIdInput" type="text" placeholder="输入 GroupId（可选，部分账号需要）" oninput="onMiniMaxGroupIdInput()">
-          <input class="tts-input" id="minimaxModelInput" type="text" placeholder="模型（默认 speech-2.6-hd）" oninput="onMiniMaxModelInput()">
-          <select class="tts-select" id="minimaxVoicePresetSelect" onchange="onMiniMaxVoicePresetChange()">
-            <option value="Japanese_IntellectualSenior">Japanese_IntellectualSenior</option>
-            <option value="Japanese_DecisivePrincess">Japanese_DecisivePrincess</option>
-            <option value="Japanese_LoyalKnight">Japanese_LoyalKnight</option>
-            <option value="Japanese_KindLady">Japanese_KindLady</option>
-            <option value="Japanese_CalmLady">Japanese_CalmLady</option>
-            <option value="Japanese_OptimisticYouth">Japanese_OptimisticYouth</option>
-            <option value="__custom__">手动输入（自定义 voice_id）</option>
-          </select>
-          <input class="tts-input" id="minimaxVoiceIdInput" type="text" placeholder="voice_id（必填）" oninput="onMiniMaxVoiceIdInput()">
-          <div class="tts-inline">
-            <input class="tts-input" id="minimaxSpeedInput" type="number" min="0.5" max="2" step="0.1" placeholder="语速 0.5-2.0" oninput="onMiniMaxSpeedInput()">
-            <input class="tts-input" id="minimaxVolInput" type="number" min="0.1" max="10" step="0.1" placeholder="音量 0.1-10" oninput="onMiniMaxVolInput()">
-            <input class="tts-input" id="minimaxPitchInput" type="number" min="-20" max="20" step="1" placeholder="音调 -20~20" oninput="onMiniMaxPitchInput()">
-          </div>
-          <button class="btn btn-secondary btn-sm btn-full" onclick="clearMiniMaxCache()">清空 MiniMax 缓存</button>
-          <div class="tts-note">提示：MiniMax 音频会优先读取本地缓存，未命中时再请求接口。</div>
-        </div>
-        <div class="tts-stack" id="translationToolsBox">
-          <div class="control-label" style="margin-bottom:0;">翻译与代理（始终可用）</div>
-          <div class="tts-inline">
-            <input class="tts-input" id="openaiApiKeyInput" type="password" placeholder="输入 OpenAI API Key（manyrouter token）" oninput="onOpenAIKeyInput()" onpaste="onOpenAIKeyPaste()">
-            <button class="btn btn-secondary btn-sm" id="openaiKeyPasteBtn" onclick="pasteOpenAIKey()">粘贴</button>
-            <button class="btn btn-secondary btn-sm" id="openaiKeyToggleBtn" onclick="toggleOpenAIKeyVisibility()">显示</button>
-          </div>
-          <div class="control-row" style="margin-bottom:0;">
-            <span class="control-label">使用本地代理（推荐）</span>
-            <label class="toggle-switch">
-              <input type="checkbox" id="openaiUseProxyToggle" onchange="toggleOpenAIProxyMode()">
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-          <input class="tts-input" id="openaiProxyBaseInput" type="text" value="http://127.0.0.1:8787" oninput="onOpenAIProxyBaseInput()" placeholder="本地代理地址，例如 http://127.0.0.1:8787">
-          <input class="tts-input" id="openaiBaseUrlInput" type="text" value="https://manyrouter.chaosyn.com/v1" oninput="onOpenAIBaseUrlInput()" placeholder="OpenAI Base URL（可填中转地址）">
-          <input class="tts-input" id="openaiTranslationModelInput" type="text" value="gpt-4o" oninput="onOpenAITranslationModelInput()" placeholder="翻译模型（建议 gpt-4o）">
-          <select class="tts-select" id="translationProviderSelect" onchange="onTranslationProviderChange()">
-            <option value="openai">翻译引擎：OpenAI（准确，需Key）</option>
-            <option value="google_proxy">翻译引擎：Google（免Key）</option>
-            <option value="local">翻译引擎：本地兜底（低质量）</option>
-          </select>
-          <button class="btn btn-secondary btn-sm btn-full" id="btnLockManyrouter" onclick="toggleManyrouterLock()">锁定 manyrouter 配置</button>
-          <button class="btn btn-secondary btn-sm btn-full" onclick="checkOpenAIProxyHealth()">检测代理连接</button>
-          <button class="btn btn-secondary btn-sm btn-full" onclick="testTranslationConnection()">测试翻译连接</button>
-          <button class="btn btn-secondary btn-sm btn-full" id="btnGenCurrentTrans" onclick="generateCurrentLessonTranslations()">生成当前课中文翻译</button>
-          <button class="btn btn-secondary btn-sm btn-full" id="btnRegenCurrentTrans" onclick="regenerateCurrentLessonTranslations()">重生成当前课翻译（覆盖）</button>
-          <button class="btn btn-secondary btn-sm btn-full" id="btnRegenLesson25Trans" onclick="regenerateLesson25Translations()">重生成第25课翻译（覆盖）</button>
-          <button class="btn btn-secondary btn-sm btn-full" id="btnGenAllTrans" onclick="generateAllLessonTranslations()">批量生成26-48课翻译</button>
-          <button class="btn btn-secondary btn-sm btn-full" id="btnRepairTrans" onclick="repairMissingTranslations()">补全缺失翻译（自动重试）</button>
-          <div class="translation-progress" id="translationProgressBox">
-            <div class="translation-progress-head">
-              <span>翻译任务进度</span>
-              <span id="translationProgressPct">0%</span>
-            </div>
-            <div class="translation-progress-track">
-              <div class="translation-progress-fill" id="translationProgressFill"></div>
-            </div>
-            <div class="translation-progress-status" id="translationProgressStatus">等待开始</div>
-            <div class="translation-progress-meta" id="translationProgressMeta">已完成 0/0 分块 · 重试 0 · 失败 0</div>
-          </div>
-          <div class="translation-debug" id="translationDebugBox">翻译诊断：等待测试。</div>
-        </div>
-        <div class="control-row" style="margin-top:8px; margin-bottom:0;">
-          <span class="control-label">第25课6-13句优先TTS</span>
+      <div id="audioControlsScroll">
+        <div class="control-row">
+          <span class="control-label">自动播放</span>
           <label class="toggle-switch">
-            <input type="checkbox" id="forceRangeTtsToggle" onchange="toggleForceRangeTTS()">
+            <input type="checkbox" id="autoPlayToggle" onchange="toggleAutoPlay()">
             <span class="toggle-slider"></span>
           </label>
         </div>
-        <div class="tts-note">需要准确翻译时请选择 OpenAI 翻译引擎并填写 API Key。若失败，先点“测试翻译连接”。</div>
+        <div class="control-row">
+          <span class="control-label">单句循环</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="loopToggle" onchange="toggleLoop()">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="control-row">
+          <span class="control-label">显示翻译</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="showTransToggle" onchange="toggleTranslation()">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div style="margin-top:8px;">
+          <div class="control-label" style="margin-bottom:6px;">语速调节</div>
+          <div class="speed-slider-row">
+            <input class="speed-slider" id="speedSlider" type="range" min="0.6" max="1.8" step="0.05" value="1.0" oninput="onSpeedSliderInput()">
+            <span class="speed-value" id="speedValue">1.0x</span>
+          </div>
+        </div>
+        <div style="margin-top:8px;">
+          <div class="control-label" style="margin-bottom:6px;">点播方式</div>
+          <div class="playback-mode-btns">
+            <button class="playback-mode-btn active" id="pbMode-auto" onclick="setPlaybackMode('auto')">自动</button>
+            <button class="playback-mode-btn" id="pbMode-audio" onclick="setPlaybackMode('audio')">原音</button>
+            <button class="playback-mode-btn" id="pbMode-tts" onclick="setPlaybackMode('tts')">TTS</button>
+          </div>
+        </div>
+        <div style="margin-top:8px;">
+          <div class="control-label" style="margin-bottom:6px;">浏览器日语发音（备用/可试听）</div>
+          <div class="tts-inline">
+            <select class="tts-select" id="ttsVoiceSelect" onchange="onBrowserVoiceChange()" style="flex:1;"></select>
+            <button class="btn btn-secondary btn-sm" onclick="playBrowserVoiceSample()">试听</button>
+          </div>
+        </div>
+        <div class="tts-config" id="adminConfigSection" style="display:none;">
+          <div class="tts-stack" id="translationToolsBox">
+            <div class="control-label" style="margin-bottom:0;">翻译与代理（始终可用）</div>
+            <div class="tts-inline">
+              <input class="tts-input" id="openaiApiKeyInput" type="password" placeholder="输入 OpenAI API Key（manyrouter token）" oninput="onOpenAIKeyInput()" onpaste="onOpenAIKeyPaste()">
+              <button class="btn btn-secondary btn-sm" id="openaiKeyPasteBtn" onclick="pasteOpenAIKey()">粘贴</button>
+              <button class="btn btn-secondary btn-sm" id="openaiKeyToggleBtn" onclick="toggleOpenAIKeyVisibility()">显示</button>
+            </div>
+            <div class="control-row" style="margin-bottom:0;">
+              <span class="control-label">使用本地代理（推荐）</span>
+              <label class="toggle-switch">
+                <input type="checkbox" id="openaiUseProxyToggle" onchange="toggleOpenAIProxyMode()">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <input class="tts-input" id="openaiProxyBaseInput" type="text" value="http://127.0.0.1:8787" oninput="onOpenAIProxyBaseInput()" placeholder="本地代理地址，例如 http://127.0.0.1:8787">
+            <input class="tts-input" id="openaiBaseUrlInput" type="text" value="https://manyrouter.chaosyn.com/v1" oninput="onOpenAIBaseUrlInput()" placeholder="OpenAI Base URL（可填中转地址）">
+            <input class="tts-input" id="openaiTranslationModelInput" type="text" value="gpt-4o" oninput="onOpenAITranslationModelInput()" placeholder="翻译模型（建议 gpt-4o）">
+            <select class="tts-select" id="translationProviderSelect" onchange="onTranslationProviderChange()">
+              <option value="openai">翻译引擎：OpenAI（准确，需Key）</option>
+              <option value="google_proxy">翻译引擎：Google（免Key）</option>
+            </select>
+            <button class="btn btn-secondary btn-sm btn-full" id="btnLockManyrouter" onclick="toggleManyrouterLock()">锁定 manyrouter 配置</button>
+            <button class="btn btn-secondary btn-sm btn-full" onclick="checkOpenAIProxyHealth()">检测代理连接</button>
+            <button class="btn btn-secondary btn-sm btn-full" onclick="testTranslationConnection()">测试翻译连接</button>
+            <button class="btn btn-secondary btn-sm btn-full" id="btnGenCurrentTrans" onclick="generateCurrentLessonTranslations()">生成当前课中文翻译</button>
+            <button class="btn btn-secondary btn-sm btn-full" id="btnRegenCurrentTrans" onclick="regenerateCurrentLessonTranslations()">重生成当前课翻译（覆盖）</button>
+            <button class="btn btn-secondary btn-sm btn-full" id="btnRegenLesson25Trans" onclick="regenerateLesson25Translations()">重生成第25课翻译（覆盖）</button>
+            <button class="btn btn-secondary btn-sm btn-full" id="btnGenAllTrans" onclick="generateAllLessonTranslations()">批量生成26-48课翻译</button>
+            <button class="btn btn-secondary btn-sm btn-full" id="btnRepairTrans" onclick="repairMissingTranslations()">补全缺失翻译（自动重试）</button>
+            <button class="btn btn-secondary btn-sm btn-full" onclick="exportPreciseTranslationMaps()">导出当前浏览器精准翻译</button>
+            <div class="translation-progress" id="translationProgressBox">
+              <div class="translation-progress-head">
+                <span>翻译任务进度</span>
+                <span id="translationProgressPct">0%</span>
+              </div>
+              <div class="translation-progress-track">
+                <div class="translation-progress-fill" id="translationProgressFill"></div>
+              </div>
+              <div class="translation-progress-status" id="translationProgressStatus">等待开始</div>
+              <div class="translation-progress-meta" id="translationProgressMeta">已完成 0/0 分块 · 重试 0 · 失败 0</div>
+            </div>
+            <div class="translation-debug" id="translationDebugBox">翻译诊断：等待测试。</div>
+          </div>
+          <div class="control-row" style="margin-top:8px; margin-bottom:0;">
+            <span class="control-label">第25课6-13句优先TTS</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="forceRangeTtsToggle" onchange="toggleForceRangeTTS()">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="tts-note">需要准确翻译时请选择 OpenAI 翻译引擎并填写 API Key。若失败，先点“测试翻译连接”。</div>
+        </div>
       </div>
-      <div style="margin-top:12px;">
+      <div id="audioControlsActions">
         <button class="btn btn-primary btn-full btn-sm" id="playAllBtn" onclick="playAll()">▶ 播放全部</button>
       </div>
     </div>
@@ -1192,6 +1358,7 @@
 
 <!-- ===== AUDIO ===== -->
 <audio id="audioPlayer" preload="auto"></audio>
+<audio id="lessonAudioPlayer" preload="metadata"></audio>
 
 <script src="./lesson_ruby_maps_26_48.js"></script>
 <script src="./lesson_override_patches.js"></script>
@@ -1243,21 +1410,63 @@ const LESSON_TIMELINES = {
 
 
 
+
     2: [0.0, 58.359],
     3: [58.359, 61.162],
     4: [61.162, 193.285],
-    5: [193.285, 212.145],
-    6: [212.145, 218.333],
-    7: [218.333, 230.129],
-    8: [230.129, 235.009],
-    9: [235.009, 238.532],
-    10: [238.532, 241.411],
-    11: [241.411, 248.681],
-    12: [248.681, 263.416],
-    13: [263.416, 294.97],
-    14: [294.97, 340.999],
-    15: [340.999, 379.841],
-    16: [379.841, 385.056]
+    5: [197.285, 215.965],
+    6: [215.965, 222.232],
+    7: [222.232, 234.039],
+    8: [234.039, 238.829],
+    9: [238.829, 242.352],
+    10: [242.352, 245.231],
+    11: [245.231, 252.501],
+    12: [252.501, 267.236],
+    13: [267.236, 298.79],
+    14: [296.79, 342.819],
+    15: [342.819, 381.661],
+    16: [380.161, 385.056]
+  },
+  26: {
+    2: [0.000, 66.919],
+    3: [66.919, 70.501],
+    4: [70.501, 207.849],
+    5: [207.849, 214.604],
+    6: [214.604, 280.477],
+    7: [280.477, 331.932],
+    8: [331.932, 376.411],
+    9: [376.411, 382.154]
+  },
+  27: {
+    2: [0.000, 50.580],
+    3: [50.580, 73.165],
+    4: [73.165, 80.478],
+    5: [80.478, 84.759],
+    6: [84.759, 90.515],
+    7: [90.515, 95.129],
+    8: [95.129, 121.728],
+    9: [121.728, 123.808],
+    10: [123.808, 138.577],
+    11: [138.577, 166.342],
+    12: [166.342, 185.313],
+    13: [185.313, 202.369],
+    14: [202.369, 204.067],
+    15: [204.067, 226.981],
+    16: [226.981, 228.127],
+    17: [228.127, 249.480],
+    18: [249.480, 271.678],
+    19: [271.678, 280.130],
+    20: [280.130, 329.661],
+    21: [329.661, 332.955],
+    22: [332.955, 344.364],
+    23: [344.364, 354.014],
+    24: [354.014, 363.458],
+    25: [363.458, 374.566],
+    26: [374.566, 383.649],
+    27: [383.649, 409.428],
+    28: [409.428, 435.020],
+    29: [435.020, 525.204],
+    30: [525.204, 531.554]
   },
   28: {
     2: [0.000, 57.146],
@@ -1276,39 +1485,819 @@ const LESSON_TIMELINES = {
     15: [332.590, 358.144],
     16: [358.144, 425.614],
     17: [425.614, 432.242]
+  },
+  29: {
+    2: [0.000, 44.317],
+    3: [44.317, 80.183],
+    4: [80.183, 83.479],
+    5: [83.479, 184.443],
+    6: [184.443, 268.453],
+    7: [268.453, 275.049],
+    8: [275.049, 287.813],
+    9: [287.813, 289.279],
+    10: [289.279, 291.916],
+    11: [291.916, 294.261],
+    12: [294.261, 300.221],
+    13: [300.221, 304.293],
+    14: [304.293, 310.358],
+    15: [310.358, 315.787],
+    16: [315.787, 321.433],
+    17: [321.433, 325.990],
+    18: [325.990, 374.127],
+    19: [374.127, 401.166],
+    20: [401.166, 425.903],
+    21: [425.903, 511.639],
+    22: [511.639, 518.474]
+  },
+  30: {
+    2: [0.000, 67.838],
+    3: [67.838, 81.876],
+    4: [81.876, 85.634],
+    5: [85.634, 92.189],
+    6: [92.189, 93.937],
+    7: [93.937, 105.967],
+    8: [105.967, 122.614],
+    9: [122.614, 134.848],
+    10: [134.848, 141.868],
+    11: [141.868, 143.944],
+    12: [143.944, 151.080],
+    13: [151.080, 162.727],
+    14: [162.727, 175.349],
+    15: [175.349, 180.542],
+    16: [180.542, 184.704],
+    17: [184.704, 193.439],
+    18: [193.439, 202.416],
+    19: [202.416, 209.982],
+    20: [209.982, 213.620],
+    21: [213.620, 226.672],
+    22: [226.672, 243.219],
+    23: [243.219, 260.402],
+    24: [260.402, 273.642],
+    25: [273.642, 284.012],
+    26: [284.012, 287.583],
+    27: [287.583, 294.399],
+    28: [294.399, 299.423],
+    29: [299.423, 304.987],
+    30: [304.987, 309.368],
+    31: [309.368, 316.460],
+    32: [316.460, 327.698],
+    33: [327.698, 338.918],
+    34: [338.918, 347.232],
+    35: [347.232, 351.393],
+    36: [351.393, 369.139],
+    37: [369.139, 393.333],
+    38: [393.333, 401.469],
+    39: [401.469, 424.538],
+    40: [424.538, 448.994],
+    41: [448.994, 504.723],
+    42: [504.723, 511.010]
+  },
+  31: {
+    2: [0.000, 61.760],
+    3: [61.760, 65.475],
+    4: [65.475, 101.341],
+    5: [101.341, 195.723],
+    6: [195.723, 339.728],
+    7: [339.728, 363.021],
+    8: [363.021, 370.552],
+    9: [370.552, 454.468],
+    10: [454.468, 482.816],
+    11: [482.816, 507.277],
+    12: [507.277, 567.464],
+    13: [567.464, 573.938]
+  },
+  32: {
+    2: [0.000, 71.341],
+    3: [71.341, 74.954],
+    4: [74.954, 134.408],
+    5: [134.408, 160.505],
+    6: [160.505, 171.166],
+    7: [171.166, 182.820],
+    8: [182.820, 189.765],
+    9: [189.765, 265.389],
+    10: [265.389, 319.586],
+    11: [319.586, 326.381],
+    12: [326.381, 338.233],
+    13: [338.233, 343.985],
+    14: [343.985, 400.307],
+    15: [400.307, 427.765],
+    16: [427.765, 453.369],
+    17: [453.369, 503.914],
+    18: [503.914, 509.882]
+  },
+  33: {
+    2: [0.000, 65.760],
+    3: [65.760, 78.576],
+    4: [78.576, 105.398],
+    5: [105.398, 149.212],
+    6: [149.212, 202.412],
+    7: [202.412, 244.701],
+    8: [244.701, 273.960],
+    9: [273.960, 307.029],
+    10: [307.029, 307.424],
+    11: [307.424, 307.819],
+    12: [307.819, 308.213],
+    13: [308.213, 308.613],
+    14: [308.613, 309.032],
+    15: [309.032, 310.288],
+    16: [310.288, 311.963],
+    17: [311.963, 313.010],
+    18: [313.010, 314.894],
+    19: [314.894, 315.941],
+    20: [315.941, 316.988],
+    21: [316.988, 318.662],
+    22: [318.662, 320.437],
+    23: [320.437, 322.220],
+    24: [322.220, 324.226],
+    25: [324.226, 325.563],
+    26: [325.563, 327.346],
+    27: [327.346, 332.823],
+    28: [332.823, 353.339],
+    29: [353.339, 355.925],
+    30: [355.925, 357.648],
+    31: [357.648, 368.282],
+    32: [368.282, 373.310],
+    33: [373.310, 427.404],
+    34: [427.404, 453.650],
+    35: [453.650, 478.062],
+    36: [478.062, 586.754]
+  },
+  34: {
+    2: [0.000, 87.783],
+    3: [87.783, 101.448],
+    4: [101.448, 104.623],
+    5: [104.623, 176.176],
+    6: [176.176, 255.786],
+    7: [255.786, 260.716],
+    8: [260.716, 326.213],
+    9: [326.213, 367.701],
+    10: [367.701, 386.766],
+    11: [386.766, 387.161],
+    12: [387.161, 388.148],
+    13: [388.148, 389.135],
+    14: [389.135, 390.517],
+    15: [390.517, 393.552],
+    16: [393.552, 395.801],
+    17: [395.801, 397.642],
+    18: [397.642, 400.682],
+    19: [400.682, 401.268],
+    20: [401.268, 407.004],
+    21: [407.004, 411.625],
+    22: [411.625, 416.885],
+    23: [416.885, 425.025],
+    24: [425.025, 447.010],
+    25: [447.010, 458.140],
+    26: [458.140, 481.038],
+    27: [481.038, 489.117],
+    28: [489.117, 586.707],
+    29: [586.707, 697.337],
+    30: [697.337, 703.586]
+  },
+  35: {
+    2: [0.000, 5.071],
+    3: [5.071, 81.384],
+    4: [81.384, 131.415],
+    5: [131.415, 150.127],
+    6: [150.127, 153.833],
+    7: [153.833, 182.481],
+    8: [182.481, 190.700],
+    9: [190.700, 195.545],
+    10: [195.545, 263.113],
+    11: [263.113, 268.081],
+    12: [268.081, 270.483],
+    13: [270.483, 288.476],
+    14: [288.476, 299.860],
+    15: [299.860, 309.778],
+    16: [309.778, 312.076],
+    17: [312.076, 329.058],
+    18: [329.058, 338.150],
+    19: [338.150, 347.844],
+    20: [347.844, 350.729],
+    21: [350.729, 365.932],
+    22: [365.932, 374.489],
+    23: [374.489, 384.433],
+    24: [384.433, 400.015],
+    25: [400.015, 405.051],
+    26: [405.051, 409.418],
+    27: [409.418, 412.785],
+    28: [412.785, 416.298],
+    29: [416.298, 430.671],
+    30: [430.671, 478.381],
+    31: [478.381, 521.175],
+    32: [521.175, 527.112],
+    33: [527.112, 532.475],
+    34: [532.475, 535.817],
+    35: [535.817, 551.772],
+    36: [551.772, 557.056],
+    37: [557.056, 562.730],
+    38: [562.730, 573.954],
+    39: [573.954, 578.578],
+    40: [578.578, 582.970],
+    41: [582.970, 590.255],
+    42: [590.255, 637.603],
+    43: [637.603, 645.324],
+    44: [645.324, 662.079],
+    45: [662.079, 685.023],
+    46: [685.023, 691.514]
+  },
+  36: {
+    2: [0.000, 13.837],
+    3: [13.837, 26.732],
+    4: [26.732, 35.175],
+    5: [35.175, 44.490],
+    6: [44.490, 56.336],
+    7: [56.336, 61.872],
+    8: [61.872, 86.066],
+    9: [86.066, 99.159],
+    10: [99.159, 102.731],
+    11: [102.731, 113.696],
+    12: [113.696, 142.969],
+    13: [142.969, 171.011],
+    14: [171.011, 209.813],
+    15: [209.813, 233.835],
+    16: [233.835, 248.387],
+    17: [248.387, 259.819],
+    18: [259.819, 269.829],
+    19: [269.829, 298.771],
+    20: [298.771, 313.463],
+    21: [313.463, 317.335],
+    22: [317.335, 351.354],
+    23: [351.354, 368.143],
+    24: [368.143, 388.864],
+    25: [388.864, 392.008],
+    26: [392.008, 399.833],
+    27: [399.833, 430.411],
+    28: [430.411, 483.947],
+    29: [483.947, 512.843],
+    30: [512.843, 537.282],
+    31: [537.282, 621.201],
+    32: [621.201, 627.146]
+  },
+  37: {
+    2: [0.000, 7.367],
+    3: [7.367, 51.696],
+    4: [51.696, 89.933],
+    5: [89.933, 114.153],
+    6: [114.153, 142.854],
+    7: [142.854, 180.840],
+    8: [180.840, 200.616],
+    9: [200.616, 234.453],
+    10: [234.453, 237.211],
+    11: [237.211, 238.795],
+    12: [238.795, 254.839],
+    13: [254.839, 288.057],
+    14: [288.057, 289.710],
+    15: [289.710, 307.979],
+    16: [307.979, 343.657],
+    17: [343.657, 345.719],
+    18: [345.719, 365.103],
+    19: [365.103, 375.462],
+    20: [375.462, 377.860],
+    21: [377.860, 399.916],
+    22: [399.916, 408.881],
+    23: [408.881, 410.385],
+    24: [410.385, 428.654],
+    25: [428.654, 434.197],
+    26: [434.197, 445.634],
+    27: [445.634, 448.188],
+    28: [448.188, 448.869],
+    29: [448.869, 450.572],
+    30: [450.572, 451.935],
+    31: [451.935, 454.319],
+    32: [454.319, 455.341],
+    33: [455.341, 457.725],
+    34: [457.725, 467.412],
+    35: [467.412, 469.845],
+    36: [469.845, 471.304],
+    37: [471.304, 474.224],
+    38: [474.224, 475.197],
+    39: [475.197, 477.630],
+    40: [477.630, 478.603],
+    41: [478.603, 480.107],
+    42: [480.107, 500.280],
+    43: [500.280, 508.339],
+    44: [508.339, 512.457],
+    45: [512.457, 521.619],
+    46: [521.619, 526.133],
+    47: [526.133, 534.343],
+    48: [534.343, 562.134],
+    49: [562.134, 587.200],
+    50: [587.200, 643.043],
+    51: [643.043, 679.005],
+    52: [679.005, 685.274]
+  },
+  38: {
+    2: [0.000, 6.995],
+    3: [6.995, 19.614],
+    4: [19.614, 23.305],
+    5: [23.305, 34.505],
+    6: [34.505, 38.494],
+    7: [38.494, 87.427],
+    8: [87.427, 91.131],
+    9: [91.131, 101.351],
+    10: [101.351, 109.356],
+    11: [109.356, 145.512],
+    12: [145.512, 176.711],
+    13: [176.711, 189.641],
+    14: [189.641, 197.301],
+    15: [197.301, 200.676],
+    16: [200.676, 211.780],
+    17: [211.780, 214.732],
+    18: [214.732, 224.588],
+    19: [224.588, 238.481],
+    20: [238.481, 246.806],
+    21: [246.806, 265.357],
+    22: [265.357, 277.321],
+    23: [277.321, 290.071],
+    24: [290.071, 299.823],
+    25: [299.823, 312.207],
+    26: [312.207, 330.357],
+    27: [330.357, 387.856],
+    28: [387.856, 425.892],
+    29: [425.892, 441.455],
+    30: [441.455, 458.298],
+    31: [458.298, 464.354],
+    32: [464.354, 476.036],
+    33: [476.036, 478.521],
+    34: [478.521, 479.477],
+    35: [479.477, 481.827],
+    36: [481.827, 483.573],
+    37: [483.573, 486.609],
+    38: [486.609, 487.328],
+    39: [487.328, 489.014],
+    40: [489.014, 497.594],
+    41: [497.594, 499.907],
+    42: [499.907, 501.058],
+    43: [501.058, 504.144],
+    44: [504.144, 505.154],
+    45: [505.154, 507.767],
+    46: [507.767, 508.828],
+    47: [508.828, 510.381],
+    48: [510.381, 530.191],
+    49: [530.191, 538.022],
+    50: [538.022, 544.827],
+    51: [544.827, 558.184],
+    52: [558.184, 564.764],
+    53: [564.764, 572.655],
+    54: [572.655, 599.435],
+    55: [599.435, 624.104],
+    56: [624.104, 673.779],
+    57: [673.779, 706.884],
+    58: [706.884, 713.138]
+  },
+  39: {
+    2: [0.000, 6.761],
+    3: [6.761, 27.229],
+    4: [27.229, 33.057],
+    5: [33.057, 37.177],
+    6: [37.177, 58.431],
+    7: [58.431, 89.320],
+    8: [89.320, 115.251],
+    9: [115.251, 121.386],
+    10: [121.386, 123.884],
+    11: [123.884, 126.363],
+    12: [126.363, 151.665],
+    13: [151.665, 162.699],
+    14: [162.699, 164.314],
+    15: [164.314, 181.614],
+    16: [181.614, 191.982],
+    17: [191.982, 195.047],
+    18: [195.047, 196.500],
+    19: [196.500, 219.996],
+    20: [219.996, 229.761],
+    21: [229.761, 230.368],
+    22: [230.368, 263.113],
+    23: [263.113, 265.052],
+    24: [265.052, 267.285],
+    25: [267.285, 287.321],
+    26: [287.321, 303.929],
+    27: [303.929, 305.683],
+    28: [305.683, 322.797],
+    29: [322.797, 339.749],
+    30: [339.749, 361.285],
+    31: [361.285, 368.552],
+    32: [368.552, 385.553],
+    33: [385.553, 390.429],
+    34: [390.429, 434.325],
+    35: [434.325, 441.234],
+    36: [441.234, 450.698],
+    37: [450.698, 457.555],
+    38: [457.555, 463.502],
+    39: [463.502, 491.094],
+    40: [491.094, 495.844],
+    41: [495.844, 504.502],
+    42: [504.502, 507.899],
+    43: [507.899, 532.294],
+    44: [532.294, 547.269],
+    45: [547.269, 592.373],
+    46: [592.373, 628.272],
+    47: [628.272, 634.154]
+  },
+  40: {
+    2: [0.000, 12.615],
+    3: [12.615, 41.495],
+    4: [41.495, 46.093],
+    5: [46.093, 50.769],
+    6: [50.769, 71.466],
+    7: [71.466, 101.386],
+    8: [101.386, 108.212],
+    9: [108.212, 110.260],
+    10: [110.260, 173.468],
+    11: [173.468, 175.705],
+    12: [175.705, 245.268],
+    13: [245.268, 247.228],
+    14: [247.228, 308.572],
+    15: [308.572, 315.633],
+    16: [315.633, 338.698],
+    17: [338.698, 347.978],
+    18: [347.978, 352.410],
+    19: [352.410, 367.395],
+    20: [367.395, 373.696],
+    21: [373.696, 377.947],
+    22: [377.947, 391.320],
+    23: [391.320, 397.419],
+    24: [397.419, 402.307],
+    25: [402.307, 406.193],
+    26: [406.193, 418.764],
+    27: [418.764, 425.753],
+    28: [425.753, 431.538],
+    29: [431.538, 437.468],
+    30: [437.468, 443.937],
+    31: [443.937, 453.775],
+    32: [453.775, 461.080],
+    33: [461.080, 470.371],
+    34: [470.371, 499.844],
+    35: [499.844, 509.783],
+    36: [509.783, 512.492],
+    37: [512.492, 533.450],
+    38: [533.450, 543.694],
+    39: [543.694, 594.555],
+    40: [594.555, 627.270],
+    41: [627.270, 634.154]
+  },
+  41: {
+    2: [0.000, 12.339],
+    3: [12.339, 60.310],
+    4: [60.310, 88.675],
+    5: [88.675, 94.272],
+    6: [94.272, 105.848],
+    7: [105.848, 114.147],
+    8: [114.147, 117.539],
+    9: [117.539, 126.586],
+    10: [126.586, 131.155],
+    11: [131.155, 168.335],
+    12: [168.335, 170.037],
+    13: [170.037, 178.122],
+    14: [178.122, 186.956],
+    15: [186.956, 208.115],
+    16: [208.115, 220.295],
+    17: [220.295, 232.123],
+    18: [232.123, 240.881],
+    19: [240.881, 253.002],
+    20: [253.002, 285.337],
+    21: [285.337, 290.535],
+    22: [290.535, 347.189],
+    23: [347.189, 354.252],
+    24: [354.252, 366.621],
+    25: [366.621, 368.290],
+    26: [368.290, 369.031],
+    27: [369.031, 371.708],
+    28: [371.708, 373.526],
+    29: [373.526, 376.606],
+    30: [376.606, 380.379],
+    31: [380.379, 402.433],
+    32: [402.433, 406.923],
+    33: [406.923, 413.746],
+    34: [413.746, 422.110],
+    35: [422.110, 434.692],
+    36: [434.692, 442.789],
+    37: [442.789, 449.620],
+    38: [449.620, 472.675],
+    39: [472.675, 477.308],
+    40: [477.308, 487.112],
+    41: [487.112, 490.182],
+    42: [490.182, 525.159],
+    43: [525.159, 534.196],
+    44: [534.196, 571.176],
+    45: [571.176, 614.938],
+    46: [614.938, 621.554]
+  },
+  42: {
+    2: [0.000, 12.345],
+    3: [12.345, 36.423],
+    4: [36.423, 54.729],
+    5: [54.729, 62.625],
+    6: [62.625, 88.152],
+    7: [88.152, 94.845],
+    8: [94.845, 97.281],
+    9: [97.281, 149.696],
+    10: [149.696, 152.192],
+    11: [152.192, 186.833],
+    12: [186.833, 209.329],
+    13: [209.329, 237.069],
+    14: [237.069, 238.872],
+    15: [238.872, 258.873],
+    16: [258.873, 265.867],
+    17: [265.867, 278.558],
+    18: [278.558, 285.049],
+    19: [285.049, 291.093],
+    20: [291.093, 319.406],
+    21: [319.406, 328.088],
+    22: [328.088, 337.067],
+    23: [337.067, 343.017],
+    24: [343.017, 354.017],
+    25: [354.017, 360.449],
+    26: [360.449, 365.249],
+    27: [365.249, 371.764],
+    28: [371.764, 398.016],
+    29: [398.016, 401.640],
+    30: [401.640, 410.051],
+    31: [410.051, 434.567],
+    32: [434.567, 476.777],
+    33: [476.777, 507.125],
+    34: [507.125, 513.794]
+  },
+  43: {
+    2: [0.000, 12.242],
+    3: [12.242, 26.822],
+    4: [26.822, 28.986],
+    5: [28.986, 52.038],
+    6: [52.038, 58.504],
+    7: [58.504, 88.581],
+    8: [88.581, 96.545],
+    9: [96.545, 98.392],
+    10: [98.392, 110.790],
+    11: [110.790, 118.221],
+    12: [118.221, 123.248],
+    13: [123.248, 134.896],
+    14: [134.896, 139.390],
+    15: [139.390, 176.683],
+    16: [176.683, 197.378],
+    17: [197.378, 202.234],
+    18: [202.234, 205.107],
+    19: [205.107, 228.162],
+    20: [228.162, 230.783],
+    21: [230.783, 236.040],
+    22: [236.040, 238.428],
+    23: [238.428, 257.558],
+    24: [257.558, 260.321],
+    25: [260.321, 264.774],
+    26: [264.774, 270.290],
+    27: [270.290, 297.035],
+    28: [297.035, 299.217],
+    29: [299.217, 303.306],
+    30: [303.306, 320.725],
+    31: [320.725, 338.822],
+    32: [338.822, 341.358],
+    33: [341.358, 351.563],
+    34: [351.563, 363.573],
+    35: [363.573, 368.785],
+    36: [368.785, 371.388],
+    37: [371.388, 389.740],
+    38: [389.740, 397.429],
+    39: [397.429, 447.265],
+    40: [447.265, 455.121],
+    41: [455.121, 515.242],
+    42: [515.242, 572.598],
+    43: [572.598, 618.226],
+    44: [618.226, 651.681],
+    45: [651.681, 657.866]
+  },
+  44: {
+    2: [0.000, 12.244],
+    3: [12.244, 83.386],
+    4: [83.386, 111.088],
+    5: [111.088, 117.137],
+    6: [117.137, 186.843],
+    7: [186.843, 201.722],
+    8: [201.722, 203.357],
+    9: [203.357, 230.561],
+    10: [230.561, 231.594],
+    11: [231.594, 248.675],
+    12: [248.675, 266.314],
+    13: [266.314, 279.583],
+    14: [279.583, 292.023],
+    15: [292.023, 293.587],
+    16: [293.587, 317.644],
+    17: [317.644, 332.101],
+    18: [332.101, 334.418],
+    19: [334.418, 361.377],
+    20: [361.377, 371.943],
+    21: [371.943, 379.355],
+    22: [379.355, 382.256],
+    23: [382.256, 403.054],
+    24: [403.054, 406.191],
+    25: [406.191, 411.706],
+    26: [411.706, 415.883],
+    27: [415.883, 423.217],
+    28: [423.217, 426.583],
+    29: [426.583, 430.087],
+    30: [430.087, 435.527],
+    31: [435.527, 454.010],
+    32: [454.010, 457.774],
+    33: [457.774, 461.024],
+    34: [461.024, 465.585],
+    35: [465.585, 483.605],
+    36: [483.605, 487.144],
+    37: [487.144, 490.217],
+    38: [490.217, 498.342],
+    39: [498.342, 502.765],
+    40: [502.765, 518.479],
+    41: [518.479, 522.015],
+    42: [522.015, 525.399],
+    43: [525.399, 534.130],
+    44: [534.130, 557.737],
+    45: [557.737, 568.376],
+    46: [568.376, 583.655],
+    47: [583.655, 587.724],
+    48: [587.724, 596.504],
+    49: [596.504, 618.382],
+    50: [618.382, 668.425],
+    51: [668.425, 712.898],
+    52: [712.898, 718.754]
+  },
+  45: {
+    2: [0.000, 13.136],
+    3: [13.136, 33.580],
+    4: [33.580, 37.703],
+    5: [37.703, 41.795],
+    6: [41.795, 46.706],
+    7: [46.706, 57.528],
+    8: [57.528, 78.689],
+    9: [78.689, 82.698],
+    10: [82.698, 87.358],
+    11: [87.358, 92.047],
+    12: [92.047, 110.835],
+    13: [110.835, 145.073],
+    14: [145.073, 153.515],
+    15: [153.515, 155.565],
+    16: [155.565, 158.261],
+    17: [158.261, 189.493],
+    18: [189.493, 200.104],
+    19: [200.104, 202.578],
+    20: [202.578, 233.405],
+    21: [233.405, 247.203],
+    22: [247.203, 249.096],
+    23: [249.096, 251.307],
+    24: [251.307, 281.257],
+    25: [281.257, 292.014],
+    26: [292.014, 294.761],
+    27: [294.761, 328.117],
+    28: [328.117, 339.260],
+    29: [339.260, 344.256],
+    30: [344.256, 346.280],
+    31: [346.280, 382.116],
+    32: [382.116, 415.966],
+    33: [415.966, 446.598],
+    34: [446.598, 454.828],
+    35: [454.828, 522.011],
+    36: [522.011, 569.683],
+    37: [569.683, 607.562],
+    38: [607.562, 614.570]
+  },
+  46: {
+    2: [0.000, 12.941],
+    3: [12.941, 31.928],
+    4: [31.928, 38.242],
+    5: [38.242, 81.307],
+    6: [81.307, 112.861],
+    7: [112.861, 122.251],
+    8: [122.251, 124.216],
+    9: [124.216, 125.502],
+    10: [125.502, 143.264],
+    11: [143.264, 169.852],
+    12: [169.852, 187.276],
+    13: [187.276, 217.243],
+    14: [217.243, 218.654],
+    15: [218.654, 256.258],
+    16: [256.258, 258.907],
+    17: [258.907, 260.085],
+    18: [260.085, 274.427],
+    19: [274.427, 301.876],
+    20: [301.876, 319.162],
+    21: [319.162, 349.649],
+    22: [349.649, 350.995],
+    23: [350.995, 374.070],
+    24: [374.070, 376.572],
+    25: [376.572, 411.967],
+    26: [411.967, 416.503],
+    27: [416.503, 417.890],
+    28: [417.890, 441.490],
+    29: [441.490, 458.919],
+    30: [458.919, 480.882],
+    31: [480.882, 489.159],
+    32: [489.159, 519.986],
+    33: [519.986, 534.318],
+    34: [534.318, 565.191],
+    35: [565.191, 617.505],
+    36: [617.505, 637.731],
+    37: [637.731, 701.494],
+    38: [701.494, 745.504],
+    39: [745.504, 784.633],
+    40: [784.633, 791.450]
+  },
+  47: {
+    2: [0.000, 12.481],
+    3: [12.481, 72.769],
+    4: [72.769, 101.326],
+    5: [101.326, 108.060],
+    6: [108.060, 117.200],
+    7: [117.200, 137.663],
+    8: [137.663, 154.648],
+    9: [154.648, 182.577],
+    10: [182.577, 240.552],
+    11: [240.552, 255.864],
+    12: [255.864, 259.775],
+    13: [259.775, 269.279],
+    14: [269.279, 289.394],
+    15: [289.394, 304.853],
+    16: [304.853, 310.452],
+    17: [310.452, 322.380],
+    18: [322.380, 359.369],
+    19: [359.369, 423.357],
+    20: [423.357, 496.133],
+    21: [496.133, 541.051],
+    22: [541.051, 581.864],
+    23: [581.864, 611.093],
+    24: [611.093, 617.673],
+    25: [617.673, 622.373],
+    26: [622.373, 626.022],
+    27: [626.022, 630.317],
+    28: [630.317, 635.391],
+    29: [635.391, 637.860],
+    30: [637.860, 665.955],
+    31: [665.955, 667.517],
+    32: [667.517, 677.345],
+    33: [677.345, 684.269],
+    34: [684.269, 687.850],
+    35: [687.850, 695.047],
+    36: [695.047, 699.132],
+    37: [699.132, 714.197],
+    38: [714.197, 720.487],
+    39: [720.487, 729.483],
+    40: [729.483, 773.985],
+    41: [773.985, 802.117],
+    42: [802.117, 808.754]
+  },
+  48: {
+    2: [0.000, 12.764],
+    3: [12.764, 78.776],
+    4: [78.776, 102.864],
+    5: [102.864, 112.098],
+    6: [112.098, 133.088],
+    7: [133.088, 150.728],
+    8: [150.728, 179.299],
+    9: [179.299, 209.498],
+    10: [209.498, 216.341],
+    11: [216.341, 217.458],
+    12: [217.458, 225.541],
+    13: [225.541, 244.272],
+    14: [244.272, 249.593],
+    15: [249.593, 268.303],
+    16: [268.303, 309.454],
+    17: [309.454, 333.144],
+    18: [333.144, 357.928],
+    19: [357.928, 358.661],
+    20: [358.661, 371.368],
+    21: [371.368, 393.699],
+    22: [393.699, 401.862],
+    23: [401.862, 418.512],
+    24: [418.512, 428.688],
+    25: [428.688, 431.864],
+    26: [431.864, 439.274],
+    27: [439.274, 440.899],
+    28: [440.899, 446.605],
+    29: [446.605, 456.065],
+    30: [456.065, 458.682],
+    31: [458.682, 462.345],
+    32: [462.345, 469.190],
+    33: [469.190, 471.383],
+    34: [471.383, 474.690],
+    35: [474.690, 477.412],
+    36: [477.412, 483.121],
+    37: [483.121, 511.499],
+    38: [511.499, 520.534],
+    39: [520.534, 530.527],
+    40: [530.527, 539.607],
+    41: [539.607, 545.594],
+    42: [545.594, 554.744],
+    43: [554.744, 594.638],
+    44: [594.638, 623.352],
+    45: [623.352, 630.194]
   }
 };
 
-const MISALIGNED_TTS_SENTENCE_IDS = {
-  25: [6, 7, 8, 9, 10, 11, 12, 13]
-};
-
-const MINIMAX_JA_PRESET_VOICES = [
-  'Japanese_IntellectualSenior',
-  'Japanese_DecisivePrincess',
-  'Japanese_LoyalKnight',
-  'Japanese_KindLady',
-  'Japanese_CalmLady',
-  'Japanese_OptimisticYouth'
-];
+const MISALIGNED_TTS_SENTENCE_IDS = {};
 
 const DEFAULT_TTS_CONFIG = {
-  provider: 'minimax',
   openaiApiKey: '',
   openaiBaseUrl: 'https://manyrouter.chaosyn.com',
   openaiTranslationModel: 'gpt-4o',
   openaiUseProxy: true,
   openaiProxyBase: 'http://127.0.0.1:8787',
-  minimaxApiKey: 'sk-api-3ywDjW9AieLNmpeeivLkaCUU0bhY79fYfDu4hMHsjKIJovj40pA5ABTU7dm775hrU5mj8yzpmH-FbWRT0hJxXilZt9v35yc4tqg_4GUN8gbN40y9WeGIFkc',
-  minimaxGroupId: '',
-  minimaxModel: 'speech-2.6-hd',
-  minimaxVoiceId: 'Japanese_KindLady',
-  minimaxSpeed: 1,
-  minimaxVol: 1,
-  minimaxPitch: 0,
   translationProvider: 'openai', // google_proxy | openai | local
   lockManyrouter: true,
-  forceMisalignedRange: true
+  forceMisalignedRange: false
 };
 
 const LESSON25_TRANSLATIONS = {
@@ -1370,6 +2359,10 @@ const LESSON_RUBY_PATCHES = (window.LESSON_RUBY_PATCHES && typeof window.LESSON_
   ? window.LESSON_RUBY_PATCHES
   : {};
 const TRANSLATION_CACHE_KEY = 'jpTeacherTranslationMaps';
+const TRANSLATION_CHUNK_CACHE_KEY = 'jpTeacherTranslationChunksV1';
+const translationChunkMemoryCache = new Map();
+const translationChunkPendingMap = new Map();
+const TRANSLATION_CHUNK_CACHE_LIMIT = 500;
 
 function loadTranslationCache() {
   try {
@@ -1380,7 +2373,15 @@ function loadTranslationCache() {
     Object.keys(parsed).forEach((lessonKey) => {
       const l = Number(lessonKey);
       if (!LESSON_TRANSLATION_MAPS[l]) LESSON_TRANSLATION_MAPS[l] = {};
-      Object.assign(LESSON_TRANSLATION_MAPS[l], parsed[lessonKey] || {});
+      const localMap = parsed[lessonKey] || {};
+      const target = LESSON_TRANSLATION_MAPS[l];
+      Object.keys(localMap).forEach((sid) => {
+        const incoming = String(localMap[sid] || '').trim();
+        if (!incoming) return;
+        const existing = String(target[sid] || '').trim();
+        // Prefer built-in bundled translations; only backfill missing entries from local cache.
+        if (!existing) target[sid] = incoming;
+      });
     });
   } catch (e) {}
 }
@@ -1398,7 +2399,98 @@ function saveTranslationCache() {
   } catch (e) {}
 }
 
+function exportPreciseTranslationMaps() {
+  try {
+    const out = {};
+    for (let l = 26; l <= 48; l++) {
+      const mp = LESSON_TRANSLATION_MAPS[l] || {};
+      const cleaned = {};
+      Object.keys(mp).forEach((k) => {
+        const v = String(mp[k] || '').trim();
+        if (v) cleaned[k] = v;
+      });
+      if (Object.keys(cleaned).length > 0) out[String(l)] = cleaned;
+    }
+    const payload = `window.LESSON_TRANSLATION_MAPS_EXTRA = ${JSON.stringify(out, null, 2)};\\n`;
+    const blob = new Blob([payload], { type: 'application/javascript;charset=utf-8' });
+    const a = document.createElement('a');
+    const ts = new Date().toISOString().replace(/[:.]/g, '-');
+    a.href = URL.createObjectURL(blob);
+    a.download = `lesson_translations_precise_${ts}.js`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => {
+      try { URL.revokeObjectURL(a.href); } catch (_) {}
+    }, 1000);
+    showToast('✅ 已导出精准翻译 JS 文件');
+  } catch (e) {
+    showToast(`⚠️ 导出失败：${extractErrorText(e)}`);
+  }
+}
+
+function loadTranslationChunkCache() {
+  try {
+    const raw = localStorage.getItem(TRANSLATION_CHUNK_CACHE_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') return;
+    Object.keys(parsed).forEach((k) => {
+      const item = parsed[k];
+      if (!item || typeof item !== 'object' || !item.value || typeof item.value !== 'object') return;
+      translationChunkMemoryCache.set(k, { ts: Number(item.ts) || 0, value: item.value });
+    });
+  } catch (_) {}
+}
+
+function saveTranslationChunkCache() {
+  try {
+    const entries = Array.from(translationChunkMemoryCache.entries())
+      .sort((a, b) => (Number(b[1] && b[1].ts) || 0) - (Number(a[1] && a[1].ts) || 0))
+      .slice(0, TRANSLATION_CHUNK_CACHE_LIMIT);
+    const out = {};
+    entries.forEach(([k, v]) => {
+      out[k] = { ts: Number(v && v.ts) || Date.now(), value: (v && v.value) || {} };
+    });
+    localStorage.setItem(TRANSLATION_CHUNK_CACHE_KEY, JSON.stringify(out));
+  } catch (_) {}
+}
+
+function buildTranslationChunkCacheKey(runtime, lessonNo, chunk) {
+  const provider = String((runtime && runtime.provider) || '').trim();
+  const endpoint = String((runtime && runtime.endpoint) || '').trim().toLowerCase();
+  const model = String(ttsConfig.openaiTranslationModel || '').trim().toLowerCase();
+  const items = (chunk || []).map((it) => ({
+    id: String((it && it.id) || '').trim(),
+    text: String((it && it.text) || '').trim()
+  })).filter((it) => it.id && it.text);
+  const raw = JSON.stringify({
+    v: 1,
+    provider,
+    endpoint,
+    model,
+    lessonNo: Number(lessonNo) || 0,
+    items
+  });
+  return `trans:${simpleHash(raw)}`;
+}
+
+function getCachedTranslationChunk(cacheKey) {
+  const hit = translationChunkMemoryCache.get(cacheKey);
+  if (!hit || !hit.value || typeof hit.value !== 'object') return null;
+  hit.ts = Date.now();
+  return { ...hit.value };
+}
+
+function setCachedTranslationChunk(cacheKey, map) {
+  if (!cacheKey || !map || typeof map !== 'object') return;
+  if (!Object.keys(map).length) return;
+  translationChunkMemoryCache.set(cacheKey, { ts: Date.now(), value: { ...map } });
+  saveTranslationChunkCache();
+}
+
 loadTranslationCache();
+loadTranslationChunkCache();
 
 const FIXED_STRUCTURE = [
   { id: 'intro', marker: '導入', label: '① 導入', part: '導入部分', keywords: ['あいさつ', '場面提示', 'テーマ導入'], colorClass: 'sec-intro' },
@@ -1921,6 +3013,10 @@ let translationTask = {
   currentChunkTotal: 0,
   status: ''
 };
+let ttsVoiceRefreshTimer = 0;
+let ttsVoiceRefreshCount = 0;
+let browserTTSPlaybackToken = 0;
+let browserTTSHighlightTimer = 0;
 
 function clampLessonNo(val) {
   const n = Number(val) || LESSON_MIN;
@@ -1933,15 +3029,10 @@ function loadTTSConfig() {
     if (saved) {
       const parsed = JSON.parse(saved) || {};
       ttsConfig = { ...DEFAULT_TTS_CONFIG, ...parsed };
+      // 历史错位兜底策略已废弃，统一关闭，避免第25课6-13句被强制切到TTS。
+      ttsConfig.forceMisalignedRange = false;
       if (typeof parsed.lockManyrouter !== 'boolean') {
         ttsConfig.lockManyrouter = true;
-      }
-      ttsConfig.provider = 'minimax';
-      if (!String(ttsConfig.minimaxApiKey || '').trim()) {
-        ttsConfig.minimaxApiKey = DEFAULT_TTS_CONFIG.minimaxApiKey;
-      }
-      if (!String(ttsConfig.minimaxVoiceId || '').trim()) {
-        ttsConfig.minimaxVoiceId = DEFAULT_TTS_CONFIG.minimaxVoiceId;
       }
       const beforeBase = String(ttsConfig.openaiBaseUrl || '');
       const normalizedBase = normalizeOpenAIBaseUrlClient(ttsConfig.openaiBaseUrl || '');
@@ -1965,7 +3056,6 @@ function loadTTSConfig() {
   } catch (e) {
     ttsConfig = { ...DEFAULT_TTS_CONFIG };
   }
-  ttsConfig.provider = 'minimax';
 }
 
 function saveTTSConfig() {
@@ -2025,10 +3115,36 @@ function setSentenceStatus(lessonId, sentenceId, status) {
 loadState();
 loadTTSConfig();
 
+let layoutHeightObserver = null;
+
+function syncLayoutHeights() {
+  const nav = document.getElementById('topnav');
+  const bottomBar = document.getElementById('bottom-bar');
+  const navH = nav ? Math.ceil(nav.getBoundingClientRect().height || 0) : 0;
+  const bottomH = bottomBar ? Math.ceil(bottomBar.getBoundingClientRect().height || 0) : 0;
+  const mainH = Math.max(220, window.innerHeight - navH - bottomH);
+  document.documentElement.style.setProperty('--topnav-h', `${navH}px`);
+  document.documentElement.style.setProperty('--bottom-bar-h', `${bottomH}px`);
+  document.documentElement.style.setProperty('--main-h', `${mainH}px`);
+}
+
+function bindLayoutHeightSync() {
+  syncLayoutHeights();
+  window.addEventListener('resize', syncLayoutHeights);
+  if (!window.ResizeObserver) return;
+  const nav = document.getElementById('topnav');
+  const bottomBar = document.getElementById('bottom-bar');
+  layoutHeightObserver = new ResizeObserver(() => syncLayoutHeights());
+  if (nav) layoutHeightObserver.observe(nav);
+  if (bottomBar) layoutHeightObserver.observe(bottomBar);
+}
+
 function init() {
-  const localPatched = prefillMissingTranslationsWithLocal(37, 48);
+  applyAdminConfigVisibility();
   buildLessonSelect();
   initTTSConfigUI();
+  initLessonAudioPanel();
+  bindLayoutHeightSync();
   document.getElementById('autoPlayToggle').checked = state.autoPlay;
   document.getElementById('loopToggle').checked = state.loop;
   document.getElementById('showTransToggle').checked = state.showTranslation;
@@ -2041,9 +3157,28 @@ function init() {
   updateBottomBar();
   updatePlayAllButton();
   renderTranslationProgressUI();
-  if (localPatched > 0) {
-    setTranslationDebug(`翻译诊断：已自动补齐缺失翻译 ${localPatched} 条（本地兜底）。如需更准，请点“补全缺失翻译（自动重试）”。`);
+}
+
+const ADMIN_MODE_KEY = 'jpAdminConfigMode';
+
+function applyAdminConfigVisibility() {
+  const box = document.getElementById('adminConfigSection');
+  if (!box) return;
+  let adminMode = false;
+  try {
+    const q = new URLSearchParams(window.location.search || '');
+    const qv = String(q.get('admin') || q.get('dev') || '').toLowerCase();
+    const byQuery = ['1', 'true', 'yes', 'on'].includes(qv);
+    const byLocal = String(window.location.hostname || '').toLowerCase() === 'localhost';
+    const bySavedMode = ['1', 'true', 'yes', 'on'].includes(String(localStorage.getItem(ADMIN_MODE_KEY) || localStorage.getItem('jpAdminConfigVisible') || '').toLowerCase());
+    adminMode = byQuery || byLocal || bySavedMode;
+    if (byQuery || byLocal) localStorage.setItem(ADMIN_MODE_KEY, '1');
+  } catch (_) {}
+  if (!adminMode) {
+    box.style.display = 'none';
+    return;
   }
+  box.style.display = 'block';
 }
 
 function buildLessonSelect() {
@@ -2058,25 +3193,44 @@ function buildLessonSelect() {
 }
 
 function getPreferredJapaneseVoice(voices) {
-  const jaVoices = (voices || []).filter((v) => /ja/i.test(v.lang || '') || /日/.test(v.name || ''));
+  const jaVoices = (voices || []).filter((v) => isLikelyJapaneseVoice(v));
   if (!jaVoices.length) return null;
-  const priority = [
-    /Google.*日本語/i,
-    /Microsoft.*(Nanami|Keita|Sayaka|Haruka|Ichiro)/i,
-    /(Kyoko|Otoya|Siri|Haruka|Ichiro)/i
-  ];
-  for (const re of priority) {
-    const hit = jaVoices.find((v) => re.test(v.name || ''));
-    if (hit) return hit;
-  }
-  return jaVoices[0];
+  const sorted = jaVoices
+    .map((v) => ({ v, score: scoreJapaneseVoice(v) }))
+    .sort((a, b) => b.score - a.score)
+    .map((x) => x.v);
+  return sorted[0] || null;
+}
+
+function isLikelyJapaneseVoice(voice) {
+  const lang = String((voice && voice.lang) || '').toLowerCase();
+  const name = String((voice && voice.name) || '').toLowerCase();
+  if (lang.startsWith('ja')) return true;
+  if (name.includes('japanese') || name.includes('日本語') || name.includes('日语')) return true;
+  return false;
+}
+
+function scoreJapaneseVoice(voice) {
+  const name = String((voice && voice.name) || '');
+  const lang = String((voice && voice.lang) || '').toLowerCase();
+  let score = 0;
+  if (lang === 'ja-jp') score += 120;
+  else if (lang.startsWith('ja')) score += 90;
+  if (/Google\s*日本語/i.test(name)) score += 1000;
+  if (/Google/i.test(name)) score += 240;
+  if (/Microsoft/i.test(name)) score += 220;
+  if (/(Kyoko|Otoya|Nanami|Keita|Sayaka|Haruka|Ichiro|Siri)/i.test(name)) score += 180;
+  if (/natural|neural|premium|enhanced/i.test(name)) score += 30;
+  return score;
 }
 
 function populateTTSVoiceOptions() {
   const sel = document.getElementById('ttsVoiceSelect');
   if (!sel) return;
   const voices = window.speechSynthesis && window.speechSynthesis.getVoices ? window.speechSynthesis.getVoices() : [];
-  const jaVoices = voices.filter((v) => /ja/i.test(v.lang || '') || /日/.test(v.name || ''));
+  const jaVoices = voices
+    .filter((v) => isLikelyJapaneseVoice(v))
+    .sort((a, b) => scoreJapaneseVoice(b) - scoreJapaneseVoice(a));
   sel.innerHTML = '';
   if (!jaVoices.length) {
     sel.innerHTML = '<option value="">未发现日语语音（浏览器可能尚未加载）</option>';
@@ -2100,11 +3254,6 @@ function populateTTSVoiceOptions() {
 }
 
 function updateTTSConfigUI() {
-  const providerSel = document.getElementById('ttsProviderSelect');
-  const browserBox = document.getElementById('browserTTSBox');
-  const openaiBox = document.getElementById('openaiTTSBox');
-  const ttsmakerBox = document.getElementById('ttsmakerTTSBox');
-  const minimaxBox = document.getElementById('minimaxTTSBox');
   const forceRange = document.getElementById('forceRangeTtsToggle');
   const apiKey = document.getElementById('openaiApiKeyInput');
   const model = document.getElementById('openaiModelInput');
@@ -2117,21 +3266,8 @@ function updateTTSConfigUI() {
   const ttsmakerToken = document.getElementById('ttsmakerTokenInput');
   const ttsmakerVoiceId = document.getElementById('ttsmakerVoiceIdInput');
   const ttsmakerSpeed = document.getElementById('ttsmakerSpeedInput');
-  const minimaxApiKey = document.getElementById('minimaxApiKeyInput');
-  const minimaxGroupId = document.getElementById('minimaxGroupIdInput');
-  const minimaxModel = document.getElementById('minimaxModelInput');
-  const minimaxVoicePreset = document.getElementById('minimaxVoicePresetSelect');
-  const minimaxVoiceId = document.getElementById('minimaxVoiceIdInput');
-  const minimaxSpeed = document.getElementById('minimaxSpeedInput');
-  const minimaxVol = document.getElementById('minimaxVolInput');
-  const minimaxPitch = document.getElementById('minimaxPitchInput');
   const transProvider = document.getElementById('translationProviderSelect');
   const lockBtn = document.getElementById('btnLockManyrouter');
-  if (providerSel) providerSel.value = ttsConfig.provider;
-  if (browserBox) browserBox.style.display = ttsConfig.provider === 'browser' ? 'flex' : 'none';
-  if (openaiBox) openaiBox.style.display = ttsConfig.provider === 'openai' ? 'flex' : 'none';
-  if (ttsmakerBox) ttsmakerBox.style.display = ttsConfig.provider === 'ttsmaker' ? 'flex' : 'none';
-  if (minimaxBox) minimaxBox.style.display = ttsConfig.provider === 'minimax' ? 'flex' : 'none';
   if (forceRange) forceRange.checked = !!ttsConfig.forceMisalignedRange;
   if (apiKey) apiKey.value = ttsConfig.openaiApiKey || '';
   if (model) model.value = ttsConfig.openaiModel || DEFAULT_TTS_CONFIG.openaiModel;
@@ -2144,17 +3280,6 @@ function updateTTSConfigUI() {
   if (ttsmakerToken) ttsmakerToken.value = ttsConfig.ttsmakerToken || '';
   if (ttsmakerVoiceId) ttsmakerVoiceId.value = ttsConfig.ttsmakerVoiceId || '';
   if (ttsmakerSpeed) ttsmakerSpeed.value = Number(ttsConfig.ttsmakerSpeed || 1);
-  if (minimaxApiKey) minimaxApiKey.value = ttsConfig.minimaxApiKey || '';
-  if (minimaxGroupId) minimaxGroupId.value = ttsConfig.minimaxGroupId || '';
-  if (minimaxModel) minimaxModel.value = ttsConfig.minimaxModel || DEFAULT_TTS_CONFIG.minimaxModel;
-  if (minimaxVoiceId) minimaxVoiceId.value = ttsConfig.minimaxVoiceId || '';
-  if (minimaxVoicePreset) {
-    const voiceId = String(ttsConfig.minimaxVoiceId || '').trim();
-    minimaxVoicePreset.value = MINIMAX_JA_PRESET_VOICES.includes(voiceId) ? voiceId : '__custom__';
-  }
-  if (minimaxSpeed) minimaxSpeed.value = Number(ttsConfig.minimaxSpeed || 1);
-  if (minimaxVol) minimaxVol.value = Number(ttsConfig.minimaxVol || 1);
-  if (minimaxPitch) minimaxPitch.value = Number(ttsConfig.minimaxPitch || 0);
   if (transProvider) transProvider.value = ttsConfig.translationProvider || DEFAULT_TTS_CONFIG.translationProvider;
   const locked = !!ttsConfig.lockManyrouter;
   if (openaiBaseUrl) openaiBaseUrl.disabled = locked;
@@ -2169,24 +3294,51 @@ function updateTTSConfigUI() {
 
 function initTTSConfigUI() {
   updateTTSConfigUI();
+  startAutoRefreshTTSVoices();
+  if (window.speechSynthesis && window.speechSynthesis.addEventListener) {
+    window.speechSynthesis.addEventListener('voiceschanged', populateTTSVoiceOptions);
+  }
 }
 
-function refreshTTSVoices() {
+function startAutoRefreshTTSVoices() {
+  if (ttsVoiceRefreshTimer) clearInterval(ttsVoiceRefreshTimer);
+  ttsVoiceRefreshCount = 0;
   populateTTSVoiceOptions();
-  showToast('🔄 已刷新浏览器语音列表');
-}
-
-function onTTSProviderChange() {
-  ttsConfig.provider = 'minimax';
-  saveTTSConfig();
-  updateTTSConfigUI();
-  showToast('🎙 已切换 MiniMax TTS');
+  ttsVoiceRefreshTimer = window.setInterval(() => {
+    ttsVoiceRefreshCount += 1;
+    populateTTSVoiceOptions();
+    const voices = window.speechSynthesis && window.speechSynthesis.getVoices ? window.speechSynthesis.getVoices() : [];
+    if (voices.some((v) => isLikelyJapaneseVoice(v)) || ttsVoiceRefreshCount >= 12) {
+      clearInterval(ttsVoiceRefreshTimer);
+      ttsVoiceRefreshTimer = 0;
+    }
+  }, 500);
 }
 
 function onBrowserVoiceChange() {
-  const val = document.getElementById('ttsVoiceSelect').value;
+  const sel = document.getElementById('ttsVoiceSelect');
+  if (!sel) return;
+  const val = sel.value;
   ttsConfig.browserVoiceURI = val || '';
   saveTTSConfig();
+  const opt = sel.options[sel.selectedIndex];
+  if (opt) showToast(`🗣 已切换浏览器发音：${opt.textContent}`);
+  playBrowserVoiceSample();
+}
+
+function playBrowserVoiceSample() {
+  const sample = 'こんにちは。日本語の発音テストです。';
+  const idx = Number(state.currentSentenceIdx || 0);
+  const oldPlaying = state.isPlaying;
+  state.isPlaying = true;
+  currentPlayingIdx = idx;
+  setPlayingUI(idx);
+  playBrowserTTS(sample, idx, { noHighlight: true });
+  if (!oldPlaying) {
+    setTimeout(() => {
+      if (!state.isPlaying) clearPlayingUI();
+    }, 50);
+  }
 }
 
 function onOpenAIKeyInput() {
@@ -2253,62 +3405,6 @@ function onTTSMakerSpeedInput() {
   saveTTSConfig();
 }
 
-function onMiniMaxApiKeyInput() {
-  ttsConfig.minimaxApiKey = (document.getElementById('minimaxApiKeyInput').value || '').trim();
-  saveTTSConfig();
-}
-
-function onMiniMaxGroupIdInput() {
-  ttsConfig.minimaxGroupId = (document.getElementById('minimaxGroupIdInput').value || '').trim();
-  saveTTSConfig();
-}
-
-function onMiniMaxModelInput() {
-  const v = (document.getElementById('minimaxModelInput').value || '').trim();
-  ttsConfig.minimaxModel = v || DEFAULT_TTS_CONFIG.minimaxModel;
-  saveTTSConfig();
-}
-
-function onMiniMaxVoicePresetChange() {
-  const sel = document.getElementById('minimaxVoicePresetSelect');
-  const input = document.getElementById('minimaxVoiceIdInput');
-  if (!sel || !input) return;
-  const preset = String(sel.value || '').trim();
-  if (!preset || preset === '__custom__') return;
-  input.value = preset;
-  ttsConfig.minimaxVoiceId = preset;
-  saveTTSConfig();
-}
-
-function onMiniMaxVoiceIdInput() {
-  const voiceId = (document.getElementById('minimaxVoiceIdInput').value || '').trim();
-  ttsConfig.minimaxVoiceId = voiceId;
-  const sel = document.getElementById('minimaxVoicePresetSelect');
-  if (sel) sel.value = MINIMAX_JA_PRESET_VOICES.includes(voiceId) ? voiceId : '__custom__';
-  saveTTSConfig();
-}
-
-function onMiniMaxSpeedInput() {
-  const raw = Number(document.getElementById('minimaxSpeedInput').value || 1);
-  const val = Number.isFinite(raw) ? Math.max(0.5, Math.min(2, raw)) : 1;
-  ttsConfig.minimaxSpeed = val;
-  saveTTSConfig();
-}
-
-function onMiniMaxVolInput() {
-  const raw = Number(document.getElementById('minimaxVolInput').value || 1);
-  const val = Number.isFinite(raw) ? Math.max(0.1, Math.min(10, raw)) : 1;
-  ttsConfig.minimaxVol = val;
-  saveTTSConfig();
-}
-
-function onMiniMaxPitchInput() {
-  const raw = Number(document.getElementById('minimaxPitchInput').value || 0);
-  const val = Number.isFinite(raw) ? Math.max(-20, Math.min(20, raw)) : 0;
-  ttsConfig.minimaxPitch = val;
-  saveTTSConfig();
-}
-
 function toggleOpenAIProxyMode() {
   if (ttsConfig.lockManyrouter) return;
   ttsConfig.openaiUseProxy = document.getElementById('openaiUseProxyToggle').checked;
@@ -2350,8 +3446,7 @@ function onTranslationProviderChange() {
   saveTTSConfig();
   const labelMap = {
     openai: 'OpenAI 翻译（准确）',
-    google_proxy: 'Google 代理翻译（免Key）',
-    local: '本地兜底翻译'
+    google_proxy: 'Google 代理翻译（免Key）'
   };
   showToast(`🌐 已切换翻译引擎：${labelMap[ttsConfig.translationProvider] || ttsConfig.translationProvider}`);
 }
@@ -2533,37 +3628,7 @@ function getTranslationRuntimeConfig() {
       openaiBaseUrl: req.openaiBaseUrl || DEFAULT_TTS_CONFIG.openaiBaseUrl
     };
   }
-  if (provider === 'local') {
-    return { ok: true, provider };
-  }
   return { ok: false, provider, reason: 'invalid_provider' };
-}
-
-function localTranslateJaToZh(text) {
-  const src = String(text || '').trim();
-  if (!src) return '';
-  if (/[\u4e00-\u9fff]/.test(src) && !/[ぁ-んァ-ン]/.test(src)) return src;
-  let out = src;
-  const rules = [
-    [/(皆さん|みなさん)/g, '大家'],
-    [/おはようございます/g, '早上好'],
-    [/こんにちは/g, '你好'],
-    [/こんばんは/g, '晚上好'],
-    [/先生/g, '老师'],
-    [/授業/g, '课程'],
-    [/勉強/g, '学习'],
-    [/練習/g, '练习'],
-    [/会話/g, '会话'],
-    [/例文/g, '例句'],
-    [/文法/g, '语法'],
-    [/宿題/g, '作业'],
-    [/では/g, '那么'],
-    [/お願いします/g, '请'],
-    [/ありがとうございました/g, '谢谢'],
-    [/お疲れ様でした/g, '辛苦了']
-  ];
-  rules.forEach(([re, rep]) => { out = out.replace(re, rep); });
-  return `【本地译】${out}`;
 }
 
 function setTranslationButtonsDisabled(disabled) {
@@ -2725,35 +3790,9 @@ function getLessonTranslationTodo(lessonNo, force = false) {
         ''
       ).trim();
       if (!v) return true;
-      // 本地兜底译文允许后续再补成更准确版本
-      if (v.startsWith('【本地译】')) return true;
       return false;
     })
     .map((s) => ({ id: String(s.id), text: s.text }));
-}
-
-function prefillMissingTranslationsWithLocal(rangeStart = LESSON_MIN, rangeEnd = LESSON_MAX) {
-  let patched = 0;
-  for (let l = rangeStart; l <= rangeEnd; l++) {
-    const lesson = LESSONS[l];
-    if (!lesson) continue;
-    if (!LESSON_TRANSLATION_MAPS[l]) LESSON_TRANSLATION_MAPS[l] = {};
-    const map = LESSON_TRANSLATION_MAPS[l];
-    lesson.sentences.forEach((s) => {
-      if (s.translation && String(s.translation).trim()) return;
-      if (map[s.id] && String(map[s.id]).trim()) {
-        s.translation = String(map[s.id]).trim();
-        return;
-      }
-      const fallback = localTranslateJaToZh(s.text);
-      if (!fallback) return;
-      map[s.id] = fallback;
-      s.translation = fallback;
-      patched += 1;
-    });
-  }
-  if (patched > 0) saveTranslationCache();
-  return patched;
 }
 
 function clearLessonTranslations(lessonNo) {
@@ -3069,51 +4108,55 @@ async function requestOpenAITranslationChunk(runtime, lessonNo, chunk) {
 async function requestTranslationChunk(lessonNo, chunk) {
   const runtime = getTranslationRuntimeConfig();
   if (!runtime.ok) throw new Error(runtime.reason || 'translation_runtime_invalid');
-
-  if (runtime.provider === 'local') {
-    const out = {};
-    (chunk || []).forEach((it) => {
-      const id = String((it && it.id) || '').trim();
-      const text = String((it && it.text) || '').trim();
-      if (id && text) out[id] = localTranslateJaToZh(text);
-    });
-    return out;
+  const cacheKey = buildTranslationChunkCacheKey(runtime, lessonNo, chunk);
+  const cached = getCachedTranslationChunk(cacheKey);
+  if (cached) return cached;
+  if (translationChunkPendingMap.has(cacheKey)) {
+    return translationChunkPendingMap.get(cacheKey);
   }
 
-  if (runtime.provider === 'google_proxy') {
-    const res = await fetch(runtime.endpoint, {
-      method: 'POST',
-      headers: runtime.headers,
-      body: JSON.stringify({
-        source: 'ja',
-        target: 'zh-CN',
-        items: chunk
-      })
-    });
-    if (!res.ok) {
-      const txt = (await res.text().catch(() => '')).slice(0, 300);
-      throw new Error(`GOOGLE_HTTP_${res.status}:${txt}`);
+  const reqPromise = (async () => {
+    let rawOut = {};
+
+    if (runtime.provider === 'google_proxy') {
+      const res = await fetch(runtime.endpoint, {
+        method: 'POST',
+        headers: runtime.headers,
+        body: JSON.stringify({
+          source: 'ja',
+          target: 'zh-CN',
+          items: chunk
+        })
+      });
+      if (!res.ok) {
+        const txt = (await res.text().catch(() => '')).slice(0, 300);
+        throw new Error(`GOOGLE_HTTP_${res.status}:${txt}`);
+      }
+      const data = await res.json().catch(() => ({}));
+      const map = (data && data.translations && typeof data.translations === 'object') ? data.translations : {};
+      rawOut = { ...map };
+    } else {
+      rawOut = await requestOpenAITranslationChunk(runtime, lessonNo, chunk);
     }
-    const data = await res.json().catch(() => ({}));
-    const map = (data && data.translations && typeof data.translations === 'object') ? data.translations : {};
-    const out = { ...map };
-    (chunk || []).forEach((it) => {
-      const id = String((it && it.id) || '').trim();
-      const text = String((it && it.text) || '').trim();
-      if (!id || !text) return;
-      if (!out[id]) out[id] = localTranslateJaToZh(text);
-    });
-    return out;
-  }
 
-  return requestOpenAITranslationChunk(runtime, lessonNo, chunk);
+    const normalized = normalizeTranslationMap(rawOut, chunk);
+    if (Object.keys(normalized).length) setCachedTranslationChunk(cacheKey, normalized);
+    return normalized;
+  })();
+
+  translationChunkPendingMap.set(cacheKey, reqPromise);
+  try {
+    return await reqPromise;
+  } finally {
+    translationChunkPendingMap.delete(cacheKey);
+  }
 }
 
 async function salvageFailedChunk(lessonNo, chunk) {
   if (!Array.isArray(chunk) || !chunk.length) return { recovered: 0, localFallback: 0, failedIds: [] };
   if (!LESSON_TRANSLATION_MAPS[lessonNo]) LESSON_TRANSLATION_MAPS[lessonNo] = {};
   let recovered = 0;
-  let localFallback = 0;
+  const localFallback = 0;
   const failedIds = [];
   for (const item of chunk) {
     const id = String((item && item.id) || '').trim();
@@ -3133,14 +4176,6 @@ async function salvageFailedChunk(lessonNo, chunk) {
         }
       } catch (_) {}
       await sleepMs(450 + i * 350);
-    }
-    if (!done) {
-      const fallback = localTranslateJaToZh(text);
-      if (fallback) {
-        LESSON_TRANSLATION_MAPS[lessonNo][id] = fallback;
-        localFallback += 1;
-        done = true;
-      }
     }
     if (!done) failedIds.push(id);
   }
@@ -3276,8 +4311,8 @@ async function generateCurrentLessonTranslations() {
     const fail = summary.failedChunks.length;
     finishTranslationTask(fail ? `第${lessonNo}课完成，失败 ${fail} 个分块` : `第${lessonNo}课翻译完成`);
     const firstErr = fail ? `；首个错误：${summary.failedChunks[0].error}` : '';
-    showToast(`✅ 第${lessonNo}课翻译完成（新增 ${summary.added}，补救 ${summary.recovered}，本地兜底 ${summary.localFallback}，重试 ${summary.retries} 次${fail ? `，失败 ${fail} 块` : ''}${firstErr}）`);
-    setTranslationDebug(`翻译诊断：第${lessonNo}课完成，新增 ${summary.added}，补救 ${summary.recovered}，本地兜底 ${summary.localFallback}，失败 ${fail} 块。${fail ? `首个错误：${summary.failedChunks[0].error}` : '无失败。'}`, fail ? 'err' : 'ok');
+    showToast(`✅ 第${lessonNo}课翻译完成（新增 ${summary.added}，补救 ${summary.recovered}，重试 ${summary.retries} 次${fail ? `，失败 ${fail} 块` : ''}${firstErr}）`);
+    setTranslationDebug(`翻译诊断：第${lessonNo}课完成，新增 ${summary.added}，补救 ${summary.recovered}，失败 ${fail} 块。${fail ? `首个错误：${summary.failedChunks[0].error}` : '无失败。'}`, fail ? 'err' : 'ok');
   } catch (e) {
     console.error(e);
     finishTranslationTask('翻译任务失败');
@@ -3334,8 +4369,8 @@ async function regenerateCurrentLessonTranslations() {
     renderAll();
     const fail = summary.failedChunks.length;
     finishTranslationTask(fail ? `第${lessonNo}课重生成完成，失败 ${fail} 个分块` : `第${lessonNo}课重生成完成`);
-    showToast(`✅ 第${lessonNo}课翻译已重生成（新增 ${summary.added}，补救 ${summary.recovered}，本地兜底 ${summary.localFallback}${fail ? `，失败 ${fail} 块` : ''}）`);
-    setTranslationDebug(`翻译诊断：第${lessonNo}课重生成完成。新增 ${summary.added}，补救 ${summary.recovered}，本地兜底 ${summary.localFallback}${fail ? `，失败 ${fail} 块` : '。'}`, fail ? 'err' : 'ok');
+    showToast(`✅ 第${lessonNo}课翻译已重生成（新增 ${summary.added}，补救 ${summary.recovered}${fail ? `，失败 ${fail} 块` : ''}）`);
+    setTranslationDebug(`翻译诊断：第${lessonNo}课重生成完成。新增 ${summary.added}，补救 ${summary.recovered}${fail ? `，失败 ${fail} 块` : '。'}`, fail ? 'err' : 'ok');
   } catch (e) {
     console.error(e);
     finishTranslationTask('重生成任务失败');
@@ -3433,11 +4468,11 @@ async function generateAllLessonTranslations() {
     renderAll();
     const failChunks = translationTask.failedChunks;
     finishTranslationTask(failChunks ? `批量翻译完成，失败 ${failChunks} 个分块` : '26-48课翻译全部完成');
-    showToast(`✅ 26-48课翻译完成（新增 ${totalAdded}，补救 ${totalRecovered}，本地兜底 ${totalLocalFallback}，重试 ${translationTask.retries} 次${failChunks ? `，失败 ${failChunks} 块` : ''}）`);
+    showToast(`✅ 26-48课翻译完成（新增 ${totalAdded}，补救 ${totalRecovered}，重试 ${translationTask.retries} 次${failChunks ? `，失败 ${failChunks} 块` : ''}）`);
     if (failedLessonTips.length) {
       console.warn('批量翻译失败分块：', failedLessonTips.join(', '));
     }
-    setTranslationDebug(`翻译诊断：批量完成，新增 ${totalAdded}，补救 ${totalRecovered}，本地兜底 ${totalLocalFallback}，失败 ${failChunks} 块${failedLessonTips.length ? `，失败课次：${failedLessonTips.join('、')}` : ''}`, failChunks ? 'err' : 'ok');
+    setTranslationDebug(`翻译诊断：批量完成，新增 ${totalAdded}，补救 ${totalRecovered}，失败 ${failChunks} 块${failedLessonTips.length ? `，失败课次：${failedLessonTips.join('、')}` : ''}`, failChunks ? 'err' : 'ok');
   } catch (e) {
     console.error(e);
     finishTranslationTask('批量翻译失败');
@@ -3522,8 +4557,8 @@ async function repairMissingTranslations() {
     renderAll();
     const failChunks = translationTask.failedChunks;
     finishTranslationTask(failChunks ? `补全完成，仍失败 ${failChunks} 个分块` : '补全完成，全部成功');
-    showToast(`✅ 补全完成（新增 ${totalAdded}，补救 ${totalRecovered}，本地兜底 ${totalLocalFallback}${failChunks ? `，仍失败 ${failChunks} 块` : ''}）`);
-    setTranslationDebug(`翻译诊断：补全完成。新增 ${totalAdded}，补救 ${totalRecovered}，本地兜底 ${totalLocalFallback}${failedLessonTips.length ? `；仍失败课次：${failedLessonTips.join('、')}` : '；无剩余失败。'}`, failChunks ? 'err' : 'ok');
+    showToast(`✅ 补全完成（新增 ${totalAdded}，补救 ${totalRecovered}${failChunks ? `，仍失败 ${failChunks} 块` : ''}）`);
+    setTranslationDebug(`翻译诊断：补全完成。新增 ${totalAdded}，补救 ${totalRecovered}${failedLessonTips.length ? `；仍失败课次：${failedLessonTips.join('、')}` : '；无剩余失败。'}`, failChunks ? 'err' : 'ok');
   } catch (e) {
     console.error(e);
     finishTranslationTask('补全任务失败');
@@ -3544,14 +4579,134 @@ function shouldUseTTSForMisalignedRange(lessonNo, sentenceId) {
   return list.includes(sentenceId);
 }
 
+function formatLessonAudioTime(sec) {
+  const s = Math.max(0, Math.floor(Number(sec) || 0));
+  const m = Math.floor(s / 60);
+  const r = s % 60;
+  return `${String(m).padStart(2, '0')}:${String(r).padStart(2, '0')}`;
+}
+
+function getLessonTimelineMaxEnd(lessonNo) {
+  const timeline = LESSON_TIMELINES[lessonNo] || {};
+  let maxEnd = 0;
+  Object.keys(timeline).forEach((k) => {
+    const seg = timeline[k];
+    if (!Array.isArray(seg) || seg.length < 2) return;
+    const end = Number(seg[1]) || 0;
+    if (end > maxEnd) maxEnd = end;
+  });
+  return maxEnd;
+}
+
+function syncLessonAudioPanelUI() {
+  const player = document.getElementById('lessonAudioPlayer');
+  const timeline = document.getElementById('lessonAudioTimeline');
+  const timeLabel = document.getElementById('lessonAudioTimeLabel');
+  const toggleBtn = document.getElementById('lessonAudioToggleBtn');
+  if (!player || !timeline || !timeLabel || !toggleBtn) return;
+  const duration = Number(player.duration) > 0 ? Number(player.duration) : getLessonTimelineMaxEnd(state.currentLesson);
+  const current = Math.max(0, Number(player.currentTime) || 0);
+  timeline.max = String(Math.max(0, duration));
+  timeline.value = String(current);
+  timeLabel.textContent = `${formatLessonAudioTime(current)} / ${formatLessonAudioTime(duration)}`;
+  toggleBtn.textContent = player.paused ? '▶ 原音播放' : '⏸ 暂停原音';
+}
+
+function updateLessonAudioPanel() {
+  const strip = document.getElementById('lessonAudioStrip');
+  const fileLabel = document.getElementById('lessonAudioFileLabel');
+  const speedSel = document.getElementById('lessonAudioSpeedSelect');
+  const player = document.getElementById('lessonAudioPlayer');
+  if (!strip || !fileLabel || !speedSel || !player) return;
+  if (state.currentLesson < 25 || state.currentLesson > 48) {
+    strip.style.display = 'none';
+    return;
+  }
+  strip.style.display = 'block';
+  const src = getLessonAudioPath(state.currentLesson);
+  fileLabel.textContent = src ? `原音：${src.split('/').pop()}` : '原音：未配置';
+  if (src && player.dataset.lessonSrc !== src) {
+    player.pause();
+    player.src = encodeURI(src);
+    player.dataset.lessonSrc = src;
+    player.load();
+  }
+  player.playbackRate = Number(speedSel.value || 1) || 1;
+  syncLessonAudioPanelUI();
+}
+
+function toggleLessonAudioPlayPause() {
+  const player = document.getElementById('lessonAudioPlayer');
+  if (!player) return;
+  if (!player.src) {
+    updateLessonAudioPanel();
+    if (!player.src) {
+      showToast('⚠️ 当前课未配置原音文件');
+      return;
+    }
+  }
+  if (player.paused) {
+    const mainAudio = document.getElementById('audioPlayer');
+    stopCurrentPlayback(mainAudio);
+    clearPlayingUI();
+    const p = player.play();
+    if (p && typeof p.catch === 'function') p.catch(() => showToast('⚠️ 原音播放失败'));
+  } else {
+    player.pause();
+  }
+  syncLessonAudioPanelUI();
+}
+
+function pauseLessonAudioPanelPlayback() {
+  const player = document.getElementById('lessonAudioPlayer');
+  if (!player) return;
+  if (!player.paused) player.pause();
+}
+
+function restartLessonAudio() {
+  const player = document.getElementById('lessonAudioPlayer');
+  if (!player) return;
+  player.currentTime = 0;
+  if (player.paused) {
+    const p = player.play();
+    if (p && typeof p.catch === 'function') p.catch(() => {});
+  }
+  syncLessonAudioPanelUI();
+}
+
+function onLessonAudioTimelineInput() {
+  const player = document.getElementById('lessonAudioPlayer');
+  const timeline = document.getElementById('lessonAudioTimeline');
+  if (!player || !timeline) return;
+  player.currentTime = Number(timeline.value || 0);
+  syncLessonAudioPanelUI();
+}
+
+function onLessonAudioSpeedChange() {
+  const player = document.getElementById('lessonAudioPlayer');
+  const speedSel = document.getElementById('lessonAudioSpeedSelect');
+  if (!player || !speedSel) return;
+  player.playbackRate = Number(speedSel.value || 1) || 1;
+}
+
+function initLessonAudioPanel() {
+  const player = document.getElementById('lessonAudioPlayer');
+  if (!player) return;
+  player.addEventListener('timeupdate', syncLessonAudioPanelUI);
+  player.addEventListener('loadedmetadata', syncLessonAudioPanelUI);
+  player.addEventListener('ended', syncLessonAudioPanelUI);
+  player.addEventListener('pause', syncLessonAudioPanelUI);
+  player.addEventListener('play', syncLessonAudioPanelUI);
+}
+
 function renderAll() {
   const lesson = LESSONS[state.currentLesson];
   document.getElementById('lessonTitle').textContent = lesson.title + ' ' + lesson.board.grammar;
   document.getElementById('lessonSubtitle').textContent = lesson.subtitle;
   document.getElementById('sentenceCount').textContent = lesson.sentences.length;
+  updateLessonAudioPanel();
   renderStructureGuides();
   renderReadMode();
-  renderShadowMode();
   renderMemoMode();
   renderBoardMode();
   updateStats();
@@ -3601,7 +4756,7 @@ function buildStructureGuideHTML(lesson) {
 function renderStructureGuides() {
   const lesson = LESSONS[state.currentLesson];
   const html = buildStructureGuideHTML(lesson);
-  ['readStructureGuide', 'shadowStructureGuide', 'memoStructureGuide'].forEach((id) => {
+  ['readStructureGuide', 'memoStructureGuide'].forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.innerHTML = html;
   });
@@ -3640,42 +4795,6 @@ function renderReadMode() {
         </div>
       </div>
       <button class="play-btn" id="playBtn-${s.id}" onclick="event.stopPropagation(); playSentenceById(${s.id}, ${idx}, 'read')">▶</button>
-    `;
-    container.appendChild(div);
-  });
-}
-
-// =============================================
-// SHADOW MODE
-// =============================================
-function renderShadowMode() {
-  const lesson = LESSONS[state.currentLesson];
-  const container = document.getElementById('shadowList');
-  container.innerHTML = '';
-  let prevSectionId = '';
-  lesson.sentences.forEach((s, idx) => {
-    if (s.sectionId !== prevSectionId) {
-      container.insertAdjacentHTML('beforeend', buildSectionDividerHTML(s));
-      prevSectionId = s.sectionId;
-    }
-    const showZh = state.showTranslation;
-    const sectionColor = getSectionColorClass(s);
-    const div = document.createElement('div');
-    div.className = `sentence-item ${sectionColor}`;
-    div.id = `shadow-${s.id}`;
-    div.onclick = () => playSentence(s, idx, 'shadow');
-    div.innerHTML = `
-      <div class="sentence-num">${s.id}</div>
-      <div class="sentence-content">
-        <div class="sentence-jp" id="jp-shadow-${s.id}">${renderSentenceJP(s)}</div>
-        <div class="sentence-zh${showZh ? ' visible' : ''}" id="trans-shadow-${s.id}">${s.translation || '（未生成翻译，点击右侧生成）'}</div>
-        <div class="sentence-struct">
-          <span class="section-chip ${sectionColor}">${s.sectionLabel || '② プレゼンテーション'}</span>
-          <span>现在请讲「${s.sectionPart || 'プレゼンテーション部分'}」</span>
-          <span>👉（${(s.sectionKeywords || []).join('、')}）</span>
-        </div>
-      </div>
-      <button class="play-btn" id="shadowPlayBtn-${s.id}" onclick="event.stopPropagation(); playSentenceById(${s.id}, ${idx}, 'shadow')">▶</button>
     `;
     container.appendChild(div);
   });
@@ -4184,7 +5303,7 @@ async function requestMiniMaxSentenceBlob(proxyBase, apiKey, basePayload, text, 
 }
 
 function getSentenceJPTargets(sentenceId) {
-  return [`jp-read-${sentenceId}`, `jp-shadow-${sentenceId}`, `jp-memo-${sentenceId}`]
+  return [`jp-read-${sentenceId}`, `jp-memo-${sentenceId}`]
     .map((id) => document.getElementById(id))
     .filter(Boolean);
 }
@@ -4251,7 +5370,7 @@ function restoreInlineSentenceHighlight(sentenceId) {
 }
 
 function restoreAllInlineSentenceHighlight() {
-  document.querySelectorAll('[id^="jp-read-"], [id^="jp-shadow-"], [id^="jp-memo-"]').forEach((el) => {
+  document.querySelectorAll('[id^="jp-read-"], [id^="jp-memo-"]').forEach((el) => {
     if (el && el.dataset && el.dataset.origHtml !== undefined) {
       el.innerHTML = el.dataset.origHtml;
       delete el.dataset.origHtml;
@@ -4348,6 +5467,11 @@ function getSentenceClip(lessonNo, sentenceId) {
 }
 
 function stopTTS() {
+  browserTTSPlaybackToken += 1;
+  if (browserTTSHighlightTimer) {
+    clearInterval(browserTTSHighlightTimer);
+    browserTTSHighlightTimer = 0;
+  }
   if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
   }
@@ -4379,6 +5503,27 @@ function stopCurrentPlayback(audio) {
   updatePlayAllButton();
 }
 
+function pauseActivePlayback(audio) {
+  if (currentPlaybackType === 'tts' && 'speechSynthesis' in window) {
+    try { window.speechSynthesis.pause(); } catch (_) {}
+    return;
+  }
+  try { audio.pause(); } catch (_) {}
+}
+
+function resumeActivePlayback(audio) {
+  if (currentPlaybackType === 'tts' && 'speechSynthesis' in window) {
+    try { window.speechSynthesis.resume(); } catch (_) {}
+    return Promise.resolve();
+  }
+  try {
+    const p = audio.play();
+    return p && typeof p.then === 'function' ? p : Promise.resolve();
+  } catch (_) {
+    return Promise.reject(new Error('resume_failed'));
+  }
+}
+
 function handlePlaybackEnded(idx) {
   state.isPlaying = false;
   state.isPaused = false;
@@ -4396,41 +5541,189 @@ function handlePlaybackEnded(idx) {
   }
 }
 
-function playBrowserTTS(text, idx) {
+function splitTextForRollingHighlight(text) {
+  const src = String(text || '');
+  if (!src.trim()) return [];
+  const matched = src.match(/[^，,、。！？!?；;]+[，,、。！？!?；;]?/g) || [src];
+  const out = [];
+  matched.forEach((raw) => {
+    const speak = String(raw || '').replace(/\s+/g, ' ').trim();
+    if (!speak) return;
+    if (!/[A-Za-z0-9ぁ-んァ-ン一-龯]/.test(speak)) {
+      if (out.length > 0) {
+        out[out.length - 1].raw += raw;
+        out[out.length - 1].speak += speak;
+      }
+      return;
+    }
+    out.push({ raw, speak });
+  });
+  if (!out.length) return [{ raw: src, speak: src.trim() }];
+  return out;
+}
+
+function pickActiveSegmentIndexByChar(segments, charIndex) {
+  if (!Array.isArray(segments) || !segments.length) return -1;
+  const at = Math.max(0, Number(charIndex) || 0);
+  let offset = 0;
+  for (let i = 0; i < segments.length; i++) {
+    offset += String((segments[i] && segments[i].raw) || '').length;
+    if (at < offset) return i;
+  }
+  return segments.length - 1;
+}
+
+function isIgnorableBrowserTTSError(evt) {
+  const err = String((evt && evt.error) || '').toLowerCase();
+  return err === 'canceled' || err === 'interrupted' || err === 'cancelled';
+}
+
+function playBrowserTTS(text, idx, options = {}) {
   if (!('speechSynthesis' in window)) {
     state.isPlaying = false;
     clearPlayingUI();
     showToast('⚠️ 当前浏览器不支持 TTS');
     return;
   }
+  pauseLessonAudioPanelPlayback();
   stopTTS();
-  const utt = new SpeechSynthesisUtterance(text);
-  utt.lang = 'ja-JP';
-  utt.rate = state.speed;
+  const token = browserTTSPlaybackToken;
   const voices = window.speechSynthesis.getVoices ? window.speechSynthesis.getVoices() : [];
-  let picked = null;
-  if (ttsConfig.browserVoiceURI) {
-    picked = voices.find((v) => (v.voiceURI || v.name) === ttsConfig.browserVoiceURI) || null;
-  }
-  if (!picked) {
-    picked = getPreferredJapaneseVoice(voices);
-  }
-  if (picked) utt.voice = picked;
-  currentPlaybackType = 'tts';
-  ttsUtterance = utt;
-  utt.onend = () => {
-    if (state.loop && state.isPlaying && currentPlayingIdx === idx) {
-      playBrowserTTS(text, idx);
-      return;
-    }
-    handlePlaybackEnded(idx);
+  const selectedVoice = (!options.forceDefaultVoice && ttsConfig.browserVoiceURI)
+    ? (voices.find((v) => (v.voiceURI || v.name) === ttsConfig.browserVoiceURI) || null)
+    : null;
+  const preferredJaVoice = getPreferredJapaneseVoice(voices);
+  const lesson = LESSONS[state.currentLesson];
+  const sentence = lesson && lesson.sentences ? lesson.sentences[idx] : null;
+  const sentenceId = sentence ? sentence.id : null;
+  const allowHighlight = !options.noHighlight && !!sentenceId;
+  const highlightSegments = splitTextForRollingHighlight(text);
+  let activeSegIndex = -1;
+  const applySegmentHighlight = (segIdx) => {
+    if (!allowHighlight || !highlightSegments.length) return;
+    const safeIdx = Math.max(0, Math.min(segIdx, highlightSegments.length - 1));
+    if (safeIdx === activeSegIndex) return;
+    activeSegIndex = safeIdx;
+    renderInlineSentenceHighlight(sentenceId, highlightSegments, safeIdx);
   };
-  utt.onerror = () => {
+  currentPlaybackType = 'tts';
+  let lastBoundaryTs = 0;
+  const clearHighlightTimer = () => {
+    if (browserTTSHighlightTimer) {
+      clearInterval(browserTTSHighlightTimer);
+      browserTTSHighlightTimer = 0;
+    }
+  };
+
+  if (allowHighlight && highlightSegments.length) {
+    applySegmentHighlight(0);
+    const startAt = Date.now();
+    clearHighlightTimer();
+    browserTTSHighlightTimer = window.setInterval(() => {
+      if (token !== browserTTSPlaybackToken) {
+        clearHighlightTimer();
+        return;
+      }
+      if (lastBoundaryTs && Date.now() - lastBoundaryTs < 700) return;
+      // Fallback when browser doesn't emit reliable boundary events.
+      const elapsedSec = (Date.now() - startAt) / 1000;
+      // Use a conservative pace so fallback highlight won't run ahead of audio.
+      const cps = Math.max(1.8, 3.6 * Number(state.speed || 1));
+      const estimatedChar = Math.floor(Math.max(0, elapsedSec - 0.15) * cps);
+      const segIdx = pickActiveSegmentIndexByChar(highlightSegments, estimatedChar);
+      if (segIdx >= 0) applySegmentHighlight(segIdx);
+    }, 120);
+  }
+
+  const speakModes = [
+    { voice: selectedVoice, lang: 'ja-JP' },
+    { voice: preferredJaVoice, lang: 'ja-JP' },
+    { voice: null, lang: String(navigator.language || 'ja-JP') }
+  ];
+  let modeIdx = 0;
+  let startTimer = 0;
+  const clearStartTimer = () => {
+    if (startTimer) {
+      clearTimeout(startTimer);
+      startTimer = 0;
+    }
+  };
+  const failAll = (msg) => {
+    clearStartTimer();
+    clearHighlightTimer();
+    if (allowHighlight) restoreInlineSentenceHighlight(sentenceId);
     state.isPlaying = false;
     clearPlayingUI();
-    showToast('⚠️ TTS 朗读失败');
+    showToast(msg || '⚠️ TTS 朗读失败');
   };
-  window.speechSynthesis.speak(utt);
+  const trySpeak = () => {
+    if (token !== browserTTSPlaybackToken) return;
+    const mode = speakModes[Math.min(modeIdx, speakModes.length - 1)];
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.rate = state.speed;
+    if (mode.lang) utt.lang = mode.lang;
+    if (mode.voice) utt.voice = mode.voice;
+    ttsUtterance = utt;
+    let started = false;
+    utt.onstart = () => {
+      if (token !== browserTTSPlaybackToken) return;
+      started = true;
+      clearStartTimer();
+    };
+    utt.onboundary = (evt) => {
+      if (token !== browserTTSPlaybackToken) return;
+      if (!allowHighlight || !highlightSegments.length) return;
+      lastBoundaryTs = Date.now();
+      const segIdx = pickActiveSegmentIndexByChar(highlightSegments, evt && evt.charIndex);
+      if (segIdx >= 0) applySegmentHighlight(segIdx);
+    };
+    utt.onend = () => {
+      if (token !== browserTTSPlaybackToken) return;
+      clearStartTimer();
+      clearHighlightTimer();
+      if (allowHighlight) restoreInlineSentenceHighlight(sentenceId);
+      if (state.loop && state.isPlaying && currentPlayingIdx === idx) {
+        playBrowserTTS(text, idx, options);
+        return;
+      }
+      handlePlaybackEnded(idx);
+    };
+    utt.onerror = (evt) => {
+      if (token !== browserTTSPlaybackToken) return;
+      if (isIgnorableBrowserTTSError(evt)) return;
+      clearStartTimer();
+      modeIdx += 1;
+      if (modeIdx < speakModes.length) {
+        trySpeak();
+        return;
+      }
+      failAll('⚠️ TTS 朗读失败');
+    };
+    try { window.speechSynthesis.resume(); } catch (_) {}
+    try {
+      window.speechSynthesis.speak(utt);
+    } catch (_) {
+      modeIdx += 1;
+      if (modeIdx < speakModes.length) {
+        trySpeak();
+        return;
+      }
+      failAll('⚠️ 浏览器TTS调用失败');
+      return;
+    }
+    clearStartTimer();
+    startTimer = window.setTimeout(() => {
+      if (token !== browserTTSPlaybackToken) return;
+      if (started || window.speechSynthesis.speaking) return;
+      modeIdx += 1;
+      if (modeIdx < speakModes.length) {
+        trySpeak();
+        return;
+      }
+      failAll('⚠️ 浏览器TTS未启动，请检查系统语音服务');
+    }, 1500);
+  };
+  trySpeak();
 }
 
 async function playOpenAITTS(text, idx) {
@@ -4791,12 +6084,19 @@ async function playMiniMaxTTS(text, idx) {
 }
 
 function playTTS(text, idx) {
-  playMiniMaxTTS(text, idx);
+  if ('speechSynthesis' in window) {
+    playBrowserTTS(text, idx);
+    return;
+  }
+  state.isPlaying = false;
+  clearPlayingUI();
+  showToast('⚠️ 当前浏览器不支持语音合成');
 }
 
 function playAudio(src, idx, options = {}) {
   const forceAudio = !!(options && options.forceAudio);
   const audio = document.getElementById('audioPlayer');
+  pauseLessonAudioPanelPlayback();
   const lesson = LESSONS[state.currentLesson];
   state.currentSentenceIdx = idx;
   updateBottomBar();
@@ -4814,7 +6114,7 @@ function playAudio(src, idx, options = {}) {
   // 同一句：播放中点击=暂停；暂停后再点击=继续
   if (currentPlayingIdx === idx) {
     if (state.isPlaying) {
-      audio.pause();
+      pauseActivePlayback(audio);
       state.isPlaying = false;
       state.isPaused = true;
       if (sentence && sentence.id) setSentencePlayIcon(sentence.id, '▶');
@@ -4827,7 +6127,7 @@ function playAudio(src, idx, options = {}) {
       state.isPlaying = true;
       state.isPaused = false;
       setPlayingUI(idx);
-      const p = audio.play();
+      const p = resumeActivePlayback(audio);
       if (p !== undefined) {
         p.catch(() => {
           state.isPlaying = false;
@@ -4869,10 +6169,7 @@ function playAudio(src, idx, options = {}) {
     return;
   }
   if (!forceAudio && state.playbackMode === 'audio' && !clip) {
-    state.isPlaying = false;
-    clearPlayingUI();
-    showToast('⚠️ 该课尚未配置句子时间轴，无法原音点播，请切换“自动”或“TTS”');
-    return;
+    showToast('ℹ️ 当前课未配置句子时间轴，已自动播放整段原音');
   }
   if (!forceAudio && state.playbackMode === 'audio' && forceTTSForRange) {
     showToast('ℹ️ 当前句原音可能与文本错位，建议切换“自动”或“TTS”');
@@ -4951,9 +6248,7 @@ function playSentenceById(sentenceId, idx, mode) {
 function setSentencePlayIcon(sentenceId, icon) {
   if (!sentenceId) return;
   const readBtn = document.getElementById(`playBtn-${sentenceId}`);
-  const shadowBtn = document.getElementById(`shadowPlayBtn-${sentenceId}`);
   if (readBtn) readBtn.textContent = icon;
-  if (shadowBtn) shadowBtn.textContent = icon;
 }
 
 function updatePlayAllButton() {
@@ -4975,12 +6270,14 @@ function setPlayingUI(idx) {
   if (!lesson.sentences[idx]) return;
   const sid = lesson.sentences[idx].id;
 
-  // Highlight in read/shadow/memo list
-  ['read', 'shadow', 'memo'].forEach(mode => {
+  // Highlight in read/memo list
+  ['read', 'memo'].forEach(mode => {
     const el = document.getElementById(`${mode}-${sid}`);
     if (el) el.classList.add('current-play');
-    const btn = document.getElementById(`${mode === 'read' ? 'playBtn' : 'shadowPlayBtn'}-${sid}`);
-    if (btn) btn.classList.add('playing');
+    if (mode === 'read') {
+      const btn = document.getElementById(`playBtn-${sid}`);
+      if (btn) btn.classList.add('playing');
+    }
   });
   setSentencePlayIcon(sid, '⏸');
 
@@ -4993,7 +6290,7 @@ function setPlayingUI(idx) {
 function clearPlayingUI() {
   document.querySelectorAll('.sentence-item.current-play').forEach(el => el.classList.remove('current-play'));
   document.querySelectorAll('.play-btn.playing').forEach(el => el.classList.remove('playing'));
-  document.querySelectorAll('#readList .play-btn, #shadowList .play-btn').forEach((btn) => {
+  document.querySelectorAll('#readList .play-btn').forEach((btn) => {
     btn.textContent = '▶';
   });
   restoreAllInlineSentenceHighlight();
@@ -5012,7 +6309,7 @@ function playAll() {
   const audio = document.getElementById('audioPlayer');
 
   if (state.autoPlay && state.isPlaying && currentPlayingIdx >= 0) {
-    try { audio.pause(); } catch (_) {}
+    pauseActivePlayback(audio);
     state.isPlaying = false;
     state.isPaused = true;
     updatePlayAllButton();
@@ -5023,7 +6320,7 @@ function playAll() {
     state.isPlaying = true;
     state.isPaused = false;
     setPlayingUI(currentPlayingIdx);
-    const p = audio.play();
+    const p = resumeActivePlayback(audio);
     if (p !== undefined) {
       p.catch(() => {
         state.isPlaying = false;
@@ -5106,7 +6403,7 @@ function setPlaybackMode(mode) {
   state.playbackMode = mode;
   updatePlaybackModeUI();
   saveState();
-  const ttsLabel = 'MiniMax TTS';
+  const ttsLabel = '浏览器TTS';
   const label = { auto: `自动（时间轴优先，${ttsLabel}备用）`, audio: '原音时间轴', tts: ttsLabel }[mode] || mode;
   showToast(`🎯 点播方式：${label}`);
 }
@@ -5122,18 +6419,21 @@ function updatePlaybackModeUI() {
 // MODE SWITCHING
 // =============================================
 function switchMode(mode) {
+  if (mode === 'shadow') mode = 'read';
+  if (!['read', 'memo', 'board'].includes(mode)) mode = 'read';
   state.currentMode = mode;
 
   // Update tabs
-  ['read', 'shadow', 'memo', 'board'].forEach(m => {
-    document.getElementById(`tab-${m}`).classList.toggle('active', m === mode);
+  ['read', 'memo', 'board'].forEach(m => {
+    const tab = document.getElementById(`tab-${m}`);
+    if (tab) tab.classList.toggle('active', m === mode);
     const panel = document.getElementById(`panel-${m}`);
     if (panel) panel.classList.toggle('active', m === mode);
   });
 
   // Sidebar controls
   document.getElementById('audioControls').style.display =
-    (mode === 'read' || mode === 'shadow') ? 'block' : 'none';
+    mode === 'read' ? 'block' : 'none';
   document.getElementById('memoControls').style.display =
     mode === 'memo' ? 'block' : 'none';
   document.getElementById('boardControls').style.display =
@@ -5152,7 +6452,7 @@ function switchMode(mode) {
 }
 
 function getModeLabel(mode) {
-  return { read: '📖 阅读模式', shadow: '🎧 跟读模式', memo: '🧠 背诵模式', board: '✏️ 板书模式' }[mode];
+  return { read: '📖 阅读模式', memo: '🧠 背诵模式', board: '✏️ 板书模式' }[mode] || '📖 阅读模式';
 }
 
 // =============================================
@@ -5261,8 +6561,6 @@ function getCurrentSentenceElement(sentenceId) {
   if (visible(memo)) return memo;
   const read = document.getElementById(`read-${sentenceId}`);
   if (visible(read)) return read;
-  const shadow = document.getElementById(`shadow-${sentenceId}`);
-  if (visible(shadow)) return shadow;
   return null;
 }
 
@@ -5401,9 +6699,8 @@ document.addEventListener('keydown', (e) => {
       if (state.currentMode === 'memo') markFailed();
       break;
     case '1': switchMode('read'); break;
-    case '2': switchMode('shadow'); break;
-    case '3': switchMode('memo'); break;
-    case '4': switchMode('board'); break;
+    case '2': switchMode('memo'); break;
+    case '3': switchMode('board'); break;
   }
 });
 

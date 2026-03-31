@@ -65,6 +65,57 @@ function normalizeMiniMaxBaseUrl(raw) {
   return noSlash;
 }
 
+function normalizeCompatibleBaseUrl(raw) {
+  const src = String(raw || '').trim();
+  if (!src) return '';
+  const noSlash = src.replace(/\/+$/, '');
+  if (!/^https?:\/\//i.test(noSlash)) return '';
+  return noSlash;
+}
+
+function resolveCompatiblePreset(providerRaw) {
+  const provider = String(providerRaw || '').trim().toLowerCase();
+  const presets = {
+    qwen: {
+      provider: 'qwen',
+      baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+      model: 'qwen-tts-latest',
+      voice: 'Cherry',
+      supported: true
+    },
+    deepseek: {
+      provider: 'deepseek',
+      baseUrl: 'https://api.deepseek.com/v1',
+      model: 'deepseek-chat',
+      voice: 'alloy',
+      supported: false,
+      reason: 'deepseek_no_official_tts_endpoint'
+    },
+    doubao: {
+      provider: 'doubao',
+      baseUrl: 'https://ark.cn-beijing.volces.com/api/v3',
+      model: 'doubao-tts',
+      voice: 'zh_female_wanwanxiaohe_moon_bigtts',
+      supported: true
+    },
+    custom: {
+      provider: 'custom',
+      baseUrl: '',
+      model: 'gpt-4o-mini-tts',
+      voice: 'alloy',
+      supported: true
+    }
+  };
+  return presets[provider] || presets.custom;
+}
+
+function buildCompatibleSpeechUrl(baseUrl) {
+  const base = normalizeCompatibleBaseUrl(baseUrl);
+  if (!base) return '';
+  if (/\/audio\/speech$/i.test(base)) return base;
+  return `${base}/audio/speech`;
+}
+
 function resolveOpenAIBaseUrl(req, body) {
   return normalizeOpenAIBaseUrl(
     req.headers['x-openai-base-url'] ||
@@ -477,6 +528,95 @@ async function handleMiniMaxSpeech(req, res) {
   }
 }
 
+async function handleCompatibleCheck(req, res) {
+  let body;
+  try {
+    body = await readJsonBody(req);
+  } catch (e) {
+    return sendJson(res, 400, { ok: false, error: e.message || 'Bad request' });
+  }
+
+  const provider = String(body.provider || 'custom').trim().toLowerCase();
+  const preset = resolveCompatiblePreset(provider);
+  if (!preset.supported) {
+    return sendJson(res, 200, {
+      ok: false,
+      provider: preset.provider,
+      supported: false,
+      reason: preset.reason || 'provider_not_supported'
+    });
+  }
+
+  const apiKey = String(body.apiKey || req.headers['x-openai-key'] || '').trim();
+  if (!apiKey) {
+    return sendJson(res, 400, { ok: false, provider: preset.provider, error: 'missing_api_key' });
+  }
+
+  const baseUrl = normalizeCompatibleBaseUrl(body.baseUrl || preset.baseUrl || '');
+  const endpoint = buildCompatibleSpeechUrl(baseUrl);
+  if (!endpoint) {
+    return sendJson(res, 400, { ok: false, provider: preset.provider, error: 'missing_or_invalid_base_url' });
+  }
+
+  const model = String(body.model || preset.model || '').trim() || 'gpt-4o-mini-tts';
+  const voice = String(body.voice || preset.voice || '').trim() || 'alloy';
+  const input = String(body.input || 'こんにちは。テストです。').trim();
+  const payload = {
+    model,
+    voice,
+    format: String(body.format || 'mp3').trim() || 'mp3',
+    input
+  };
+
+  try {
+    const upstream = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`
+      },
+      body: JSON.stringify(payload)
+    });
+    if (!upstream.ok) {
+      const txt = (await upstream.text().catch(() => '')).slice(0, 300);
+      return sendJson(res, 200, {
+        ok: false,
+        provider: preset.provider,
+        endpoint,
+        status: upstream.status,
+        error: `UPSTREAM_HTTP_${upstream.status}:${txt}`
+      });
+    }
+    const ctype = String(upstream.headers.get('content-type') || '').toLowerCase();
+    const size = Number(upstream.headers.get('content-length') || 0) || 0;
+    if (ctype.includes('application/json')) {
+      const txt = (await upstream.text().catch(() => '')).slice(0, 300);
+      return sendJson(res, 200, {
+        ok: false,
+        provider: preset.provider,
+        endpoint,
+        status: upstream.status,
+        error: `UPSTREAM_JSON_RESPONSE:${txt}`
+      });
+    }
+    // Consume body to ensure provider truly returned audio data.
+    const buffer = Buffer.from(await upstream.arrayBuffer());
+    return sendJson(res, 200, {
+      ok: true,
+      provider: preset.provider,
+      endpoint,
+      message: 'tts_api_reachable',
+      contentType: ctype || 'application/octet-stream',
+      bytes: size || buffer.length
+    });
+  } catch (e) {
+    const causeCode = e && e.cause && e.cause.code ? e.cause.code : '';
+    const causeMsg = e && e.cause && e.cause.message ? e.cause.message : '';
+    const msg = [e && e.message ? e.message : String(e), causeCode, causeMsg].filter(Boolean).join(' | ');
+    return sendJson(res, 502, { ok: false, provider: preset.provider, endpoint, error: `COMPATIBLE_CHECK_FAILED:${msg}` });
+  }
+}
+
 const server = http.createServer(async (req, res) => {
   setCors(res);
   if (req.method === 'OPTIONS') {
@@ -515,11 +655,14 @@ const server = http.createServer(async (req, res) => {
   if (req.method === 'POST' && req.url === '/v1/minimax/speech') {
     return handleMiniMaxSpeech(req, res);
   }
+  if (req.method === 'POST' && req.url === '/v1/compatible/check') {
+    return handleCompatibleCheck(req, res);
+  }
 
   return sendJson(res, 404, { error: 'Not found' });
 });
 
 server.listen(PORT, '127.0.0.1', () => {
   console.log(`[openai-tts-proxy] listening on http://127.0.0.1:${PORT}`);
-  console.log('[openai-tts-proxy] endpoints: GET /health, GET /v1/models, POST /v1/audio/speech, POST /v1/chat/completions, POST /v1/translate, POST /v1/ttsmaker/speech, POST /v1/minimax/speech');
+  console.log('[openai-tts-proxy] endpoints: GET /health, GET /v1/models, POST /v1/audio/speech, POST /v1/chat/completions, POST /v1/translate, POST /v1/ttsmaker/speech, POST /v1/minimax/speech, POST /v1/compatible/check');
 });
