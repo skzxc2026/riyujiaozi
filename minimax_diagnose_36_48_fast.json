@@ -1,0 +1,143 @@
+{
+  "startedAt": "2026-03-30T03:36:11.134Z",
+  "from": 36,
+  "to": 48,
+  "lessons": {
+    "36": {
+      "lines": 31,
+      "ok": 0,
+      "fail": 31,
+      "firstError": {
+        "lineNo": 1,
+        "error": "502:{\"error\":\"MINIMAX_API_1008:insufficient balance\"}",
+        "text": "（挨拶）皆さん、おはようございます。では、授業を始めましょう。授業をする前に、まず、このビデオを見てみましょう。じゃ、始めます。"
+      }
+    },
+    "37": {
+      "lines": 51,
+      "ok": 0,
+      "fail": 51,
+      "firstError": {
+        "lineNo": 1,
+        "error": "502:{\"error\":\"MINIMAX_API_1002:rate limit exceeded(RPM)\"}",
+        "text": "（挨拶）皆さん、おはようございます。では、授業を始めましょう。"
+      }
+    },
+    "38": {
+      "lines": 57,
+      "ok": 0,
+      "fail": 57,
+      "firstError": {
+        "lineNo": 1,
+        "error": "502:{\"error\":\"MINIMAX_API_1002:rate limit exceeded(RPM)\"}",
+        "text": "（挨拶）皆さん、おはようございます。では、授業を始めましょう。"
+      }
+    },
+    "39": {
+      "lines": 46,
+      "ok": 0,
+      "fail": 46,
+      "firstError": {
+        "lineNo": 1,
+        "error": "502:{\"error\":\"MINIMAX_API_1002:rate limit exceeded(RPM)\"}",
+        "text": "（挨拶）皆さん、おはようございます。では、授業を始めましょう。"
+      }
+    },
+    "40": {
+      "lines": 40,
+      "ok": 0,
+      "fail": 40,
+      "firstError": {
+        "lineNo": 1,
+        "error": "502:{\"error\":\"MINIMAX_API_1002:rate limit exceeded(RPM)\"}",
+        "text": "（挨拶）皆さん、おはようございます。今日も元気に日本語の勉強に取り組んでいきましょう。では、授業を始めましょう。"
+      }
+    },
+    "41": {
+      "lines": 45,
+      "ok": 0,
+      "fail": 45,
+      "firstError": {
+        "lineNo": 1,
+        "error": "502:{\"error\":\"MINIMAX_API_1002:rate limit exceeded(RPM)\"}",
+        "text": "（挨拶）皆さん、おはようございます。今日も元気に日本語の勉強に取り組んでいきましょう。では、授業を始めましょう。"
+      }
+    },
+    "42": {
+      "lines": 33,
+      "ok": 0,
+      "fail": 33,
+      "firstError": {
+        "lineNo": 1,
+        "error": "502:{\"error\":\"MINIMAX_API_1002:rate limit exceeded(RPM)\"}",
+        "text": "（挨拶）皆さん、おはようございます。今日も元気に日本語の勉強に取り組んでいきましょう。では、授業を始めましょう。"
+      }
+    },
+    "43": {
+      "lines": 44,
+      "ok": 0,
+      "fail": 44,
+      "firstError": {
+        "lineNo": 1,
+        "error": "502:{\"error\":\"MINIMAX_API_1002:rate limit exceeded(RPM)\"}",
+        "text": "（挨拶）皆さん、おはようございます。今日も元気に日本語の勉強に取り組んでいきましょう。では、授業を始めましょう。"
+      }
+    },
+    "44": {
+      "lines": 51,
+      "ok": 0,
+      "fail": 51,
+      "firstError": {
+        "lineNo": 1,
+        "error": "502:{\"error\":\"MINIMAX_API_1002:rate limit exceeded(RPM)\"}",
+        "text": "（挨拶）皆さん、おはようございます。今日も元気に日本語の勉強に取り組んでいきましょう。では、授業を始めましょう。"
+      }
+    },
+    "45": {
+      "lines": 37,
+      "ok": 0,
+      "fail": 37,
+      "firstError": {
+        "lineNo": 1,
+        "error": "502:{\"error\":\"MINIMAX_API_1002:rate limit exceeded(RPM)\"}",
+        "text": "（挨拶）皆さん、おはようございます。今日も元気に日本語の勉強に取り組んでいきましょう。では、授業を始めましょう。"
+      }
+    },
+    "46": {
+      "lines": 39,
+      "ok": 0,
+      "fail": 39,
+      "firstError": {
+        "lineNo": 1,
+        "error": "502:{\"error\":\"MINIMAX_API_1002:rate limit exceeded(RPM)\"}",
+        "text": "（挨拶）皆さん、おはようございます。今日も元気に日本語の勉強に取り組んでいきましょう。では、授業を始めましょう。"
+      }
+    },
+    "47": {
+      "lines": 41,
+      "ok": 0,
+      "fail": 41,
+      "firstError": {
+        "lineNo": 1,
+        "error": "502:{\"error\":\"MINIMAX_API_1002:rate limit exceeded(RPM)\"}",
+        "text": "（挨拶）皆さん、おはようございます。今日も元気に日本語の勉強に取り組んでいきましょう。では、授業を始めましょう。"
+      }
+    },
+    "48": {
+      "lines": 44,
+      "ok": 0,
+      "fail": 44,
+      "firstError": {
+        "lineNo": 1,
+        "error": "502:{\"error\":\"MINIMAX_API_1002:rate limit exceeded(RPM)\"}",
+        "text": "（挨拶）皆さん、おはようございます。今日も元気に日本語の勉強に取り組んでいきましょう。では、授業を始めましょう。"
+      }
+    }
+  },
+  "totals": {
+    "lines": 559,
+    "ok": 0,
+    "fail": 559
+  },
+  "finishedAt": "2026-03-30T03:38:38.727Z"
+}

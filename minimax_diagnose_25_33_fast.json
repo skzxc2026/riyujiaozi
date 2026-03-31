@@ -1,0 +1,63 @@
+{
+  "totals": {
+    "lines": 195,
+    "ok": 0,
+    "fail": 195
+  },
+  "lessons": {
+    "25": {
+      "lines": 15,
+      "ok": 0,
+      "fail": 15,
+      "firstError": "502:{\"error\":\"MINIMAX_API_1008:insufficient balance\"}"
+    },
+    "26": {
+      "lines": 8,
+      "ok": 0,
+      "fail": 8,
+      "firstError": "502:{\"error\":\"MINIMAX_API_1002:rate limit exceeded(RPM)\"}"
+    },
+    "27": {
+      "lines": 29,
+      "ok": 0,
+      "fail": 29,
+      "firstError": "502:{\"error\":\"MINIMAX_API_1002:rate limit exceeded(RPM)\"}"
+    },
+    "28": {
+      "lines": 17,
+      "ok": 0,
+      "fail": 17,
+      "firstError": "502:{\"error\":\"MINIMAX_API_1002:rate limit exceeded(RPM)\"}"
+    },
+    "29": {
+      "lines": 21,
+      "ok": 0,
+      "fail": 21,
+      "firstError": "502:{\"error\":\"MINIMAX_API_1002:rate limit exceeded(RPM)\"}"
+    },
+    "30": {
+      "lines": 41,
+      "ok": 0,
+      "fail": 41,
+      "firstError": "502:{\"error\":\"MINIMAX_API_1008:insufficient balance\"}"
+    },
+    "31": {
+      "lines": 12,
+      "ok": 0,
+      "fail": 12,
+      "firstError": "502:{\"error\":\"MINIMAX_API_1002:rate limit exceeded(RPM)\"}"
+    },
+    "32": {
+      "lines": 17,
+      "ok": 0,
+      "fail": 17,
+      "firstError": "502:{\"error\":\"MINIMAX_API_1002:rate limit exceeded(RPM)\"}"
+    },
+    "33": {
+      "lines": 35,
+      "ok": 0,
+      "fail": 35,
+      "firstError": "502:{\"error\":\"MINIMAX_API_1002:rate limit exceeded(RPM)\"}"
+    }
+  }
+}
