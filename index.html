@@ -71,12 +71,25 @@
     font-size: 1.1rem;
     font-weight: 700;
     letter-spacing: 0.02em;
-    white-space: nowrap;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    line-height: 1.1;
+  }
+  #topnav .logo-main {
     display: flex;
     align-items: center;
     gap: 8px;
+    white-space: nowrap;
   }
   #topnav .logo span { font-size: 1.4rem; }
+  #topnav .logo-sub {
+    font-size: 10px;
+    font-weight: 500;
+    opacity: 0.9;
+    white-space: nowrap;
+  }
   .lesson-select {
     background: rgba(255,255,255,0.12);
     border: 1px solid rgba(255,255,255,0.2);
@@ -253,6 +266,7 @@
     margin-bottom: 8px;
     background: #fafbff;
     position: relative;
+    max-width: 100%;
   }
   .sentence-item:hover { background: #f0f0ff; border-color: #c7d2fe; }
   .sentence-item.active {
@@ -288,14 +302,23 @@
   }
   .sentence-item.memorized .sentence-num { background: var(--success); }
   .sentence-item.failed .sentence-num { background: var(--danger); }
-  .sentence-content { flex: 1; }
+  .sentence-content {
+    flex: 1;
+    min-width: 0;
+    max-width: 100%;
+  }
   .sentence-jp {
     font-size: 1.05rem;
     line-height: 1.7;
     font-weight: 500;
     letter-spacing: 0.03em;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    max-width: 100%;
   }
-  .sentence-jp ruby { ruby-position: over; }
+  .sentence-jp ruby { ruby-position: over; white-space: normal; }
+  .sentence-jp rb,
+  .sentence-jp rt { white-space: normal; }
   .sentence-jp rt {
     font-size: 0.56em;
     color: #64748b;
@@ -319,6 +342,9 @@
     margin-top: 4px;
     display: none;
     line-height: 1.5;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    max-width: 100%;
   }
   .sentence-zh.visible { display: block; }
   .sentence-struct {
@@ -329,6 +355,9 @@
     gap: 6px;
     align-items: center;
     flex-wrap: wrap;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    max-width: 100%;
   }
   .section-chip {
     background: #e0e7ff;
@@ -994,6 +1023,46 @@
       height: auto;
       max-height: none;
       overflow-y: visible;
+      overflow-x: hidden;
+    }
+    #readList .sentence-item {
+      overflow-x: hidden;
+      display: grid;
+      grid-template-columns: 24px minmax(0, 1fr) 30px;
+      gap: 8px;
+      width: 100%;
+    }
+    #readList .sentence-num {
+      grid-column: 1;
+      grid-row: 1;
+      width: 24px;
+      height: 24px;
+      font-size: 0.7rem;
+      margin-top: 1px;
+    }
+    #readList .sentence-content {
+      grid-column: 2;
+      grid-row: 1;
+      min-width: 0;
+      width: 100%;
+    }
+    #readList .sentence-item > .play-btn {
+      grid-column: 3;
+      grid-row: 1;
+      width: 30px;
+      height: 30px;
+      font-size: 0.78rem;
+      margin-top: 1px;
+    }
+    .sentence-jp {
+      font-size: 0.98rem;
+      letter-spacing: 0.01em;
+      white-space: normal;
+    }
+    .sentence-jp ruby,
+    .sentence-jp rb,
+    .sentence-jp rt {
+      white-space: normal;
     }
   }
 
@@ -1082,7 +1151,10 @@
 
 <!-- ===== TOP NAV ===== -->
 <nav id="topnav">
-  <div class="logo"><span>📘</span> 日语教师资格证训练系统</div>
+  <div class="logo">
+    <div class="logo-main"><span>📘</span> 日语教师资格证训练系统</div>
+    <div class="logo-sub">公众号：手可摘星辰在努力</div>
+  </div>
   <div class="lesson-switch">
     <button class="lesson-nav-btn" onclick="prevLesson()">上一课</button>
     <select class="lesson-select" id="lessonSelect" onchange="changeLesson(this.value)">
