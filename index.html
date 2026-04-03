@@ -979,6 +979,130 @@
   }
   #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+  /* ===== Premium Modal ===== */
+  #premiumModal {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.52);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1200;
+    padding: 18px;
+  }
+  #premiumModal.show { display: flex; }
+  .premium-modal-card {
+    width: min(92vw, 460px);
+    max-height: 90vh;
+    background: #fff;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.26);
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .premium-modal-head {
+    padding: 14px 16px;
+    font-weight: 800;
+    font-size: 1rem;
+    color: #312e81;
+    background: linear-gradient(90deg, #eef2ff, #f8fafc);
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .premium-modal-body {
+    padding: 14px 16px;
+    font-size: 0.92rem;
+    color: #334155;
+    line-height: 1.65;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .premium-modal-brand {
+    color: #dc2626;
+    font-weight: 800;
+  }
+  .premium-close-top {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 4px 10px;
+    background: #fff;
+    color: #334155;
+    font-weight: 600;
+    cursor: pointer;
+    z-index: 2;
+  }
+  .premium-poster {
+    margin-top: 10px;
+    width: 100%;
+    max-height: 62vh;
+    object-fit: contain;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    display: block;
+    background: #f8fafc;
+  }
+  .premium-redeem {
+    margin-top: 10px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 10px;
+    background: #f8fafc;
+    padding: 10px;
+  }
+  .premium-redeem-label {
+    font-size: 0.78rem;
+    color: #475569;
+    margin-bottom: 6px;
+  }
+  .premium-redeem-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .premium-redeem-input {
+    flex: 1;
+    min-width: 0;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 7px 8px;
+    font-size: 0.82rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    outline: none;
+  }
+  .premium-redeem-input:focus {
+    border-color: #818cf8;
+    box-shadow: 0 0 0 2px rgba(99,102,241,0.14);
+  }
+  .premium-redeem-btn {
+    border: none;
+    border-radius: 8px;
+    padding: 7px 10px;
+    background: #4f46e5;
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .premium-redeem-status {
+    margin-top: 6px;
+    min-height: 18px;
+    font-size: 0.76rem;
+    color: #64748b;
+  }
+  .premium-redeem-status.ok { color: #166534; }
+  .premium-redeem-status.err { color: #b91c1c; }
+  .premium-admin-meta {
+    font-size: 0.72rem;
+    color: #64748b;
+    line-height: 1.45;
+  }
+
   /* ===== Responsive ===== */
   @media (max-width: 900px) {
     html, body {
@@ -1337,6 +1461,15 @@
             </div>
             <div class="translation-debug" id="translationDebugBox">翻译诊断：等待测试。</div>
           </div>
+          <div class="tts-stack" id="premiumCodeToolsBox">
+            <div class="control-label" style="margin-bottom:0;">高级课兑换码（管理员）</div>
+            <button class="btn btn-secondary btn-sm btn-full" onclick="generatePremiumRedeemCode()">🎟 生成随机兑换码</button>
+            <div class="tts-inline">
+              <input class="tts-input" id="adminRedeemLatestCode" type="text" readonly placeholder="最新兑换码会显示在这里">
+              <button class="btn btn-secondary btn-sm" onclick="copyAdminRedeemCode()">复制</button>
+            </div>
+            <div class="premium-admin-meta" id="adminRedeemMeta">尚未生成兑换码。</div>
+          </div>
           <div class="control-row" style="margin-top:8px; margin-bottom:0;">
             <span class="control-label">第25课6-13句优先TTS</span>
             <label class="toggle-switch">
@@ -1428,6 +1561,36 @@
 <!-- Toast -->
 <div id="toast"></div>
 
+<!-- Premium Gate -->
+<div id="premiumModal" onclick="onPremiumOverlayClick(event)">
+  <div class="premium-modal-card">
+    <button class="premium-close-top" onclick="closePremiumModal()">关闭</button>
+    <div class="premium-modal-head">🔒 高级功能提示</div>
+    <div class="premium-modal-body">
+      <div id="premiumLessonHint">第28-48課为高级功能。</div>
+      <div style="margin-top:8px;">
+        闲鱼关注
+        <span class="premium-modal-brand">手可摘星辰在努力</span>
+        ，点击付费19.9即可解锁所有逐字稿。
+      </div>
+      <img
+        class="premium-poster"
+        src="./IMG_6613.PNG"
+        alt="付费解锁示意图"
+        onerror="this.style.display='none';"
+      >
+      <div class="premium-redeem">
+        <div class="premium-redeem-label">已有兑换码？输入后可永久解锁第28-48課：</div>
+        <div class="premium-redeem-row">
+          <input class="premium-redeem-input" id="premiumRedeemInput" type="text" placeholder="例如 ABCD-EFGH-IJKL" onkeydown="onPremiumRedeemKeydown(event)">
+          <button class="premium-redeem-btn" onclick="redeemPremiumCode()">兑换</button>
+        </div>
+        <div class="premium-redeem-status" id="premiumRedeemStatus"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ===== AUDIO ===== -->
 <audio id="audioPlayer" preload="auto"></audio>
 <audio id="lessonAudioPlayer" preload="metadata"></audio>
@@ -1441,6 +1604,9 @@
 const LESSONS = {};
 const LESSON_MIN = 25;
 const LESSON_MAX = 48;
+const FREE_LESSON_MAX = 27;
+const PREMIUM_LESSON_MIN = 28;
+const PREMIUM_CODE_STORE_KEY = 'jpPremiumRedeemCodesV1';
 const LESSON_AUDIO_DIR = './标日教资逐字稿录音25-48课【手可摘星辰】';
 const LESSON_AUDIO_FILES = {
   25: '标日教资逐字稿--第25课.mp3',
@@ -3057,6 +3223,7 @@ let state = {
   autoPlay: false,
   loop: false,
   speed: 1.0,
+  premiumUnlocked: false,
   showTranslation: true,
   isPlaying: false,
   isPaused: false,
@@ -3089,6 +3256,8 @@ let ttsVoiceRefreshTimer = 0;
 let ttsVoiceRefreshCount = 0;
 let browserTTSPlaybackToken = 0;
 let browserTTSHighlightTimer = 0;
+let premiumCodeStore = {};
+let pendingPremiumLessonNo = 0;
 
 function clampLessonNo(val) {
   const n = Number(val) || LESSON_MIN;
@@ -3148,10 +3317,14 @@ function loadState() {
       state.playbackMode = parsed.playbackMode || 'auto';
       const sp = Number(parsed.speed || 1.0);
       state.speed = Number.isFinite(sp) ? Math.max(0.6, Math.min(1.8, sp)) : 1.0;
+      if (typeof parsed.premiumUnlocked === 'boolean') state.premiumUnlocked = parsed.premiumUnlocked;
       if (typeof parsed.showTranslation === 'boolean') state.showTranslation = parsed.showTranslation;
     }
   } catch(e) {}
   state.currentLesson = clampLessonNo(state.currentLesson);
+  if (!state.premiumUnlocked && state.currentLesson >= PREMIUM_LESSON_MIN) {
+    state.currentLesson = FREE_LESSON_MAX;
+  }
   if (!['auto', 'audio', 'tts'].includes(state.playbackMode)) {
     state.playbackMode = 'auto';
   }
@@ -3165,9 +3338,28 @@ function saveState() {
       memoMode: state.memoMode,
       playbackMode: state.playbackMode,
       speed: state.speed,
+      premiumUnlocked: !!state.premiumUnlocked,
       showTranslation: state.showTranslation
     }));
   } catch(e) {}
+}
+
+function loadPremiumCodeStore() {
+  premiumCodeStore = {};
+  try {
+    const raw = localStorage.getItem(PREMIUM_CODE_STORE_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw) || {};
+    if (parsed && typeof parsed === 'object') premiumCodeStore = parsed;
+  } catch (_) {
+    premiumCodeStore = {};
+  }
+}
+
+function savePremiumCodeStore() {
+  try {
+    localStorage.setItem(PREMIUM_CODE_STORE_KEY, JSON.stringify(premiumCodeStore || {}));
+  } catch (_) {}
 }
 
 function getLessonProgress(lessonId) {
@@ -3185,6 +3377,7 @@ function setSentenceStatus(lessonId, sentenceId, status) {
 // INIT
 // =============================================
 loadState();
+loadPremiumCodeStore();
 loadTTSConfig();
 
 let layoutHeightObserver = null;
@@ -3214,6 +3407,8 @@ function bindLayoutHeightSync() {
 function init() {
   applyAdminConfigVisibility();
   buildLessonSelect();
+  updatePremiumModalStatus();
+  renderAdminRedeemCodeInfo();
   initTTSConfigUI();
   initLessonAudioPanel();
   bindLayoutHeightSync();
@@ -3259,9 +3454,177 @@ function buildLessonSelect() {
   for (let i = LESSON_MIN; i <= LESSON_MAX; i++) {
     const opt = document.createElement('option');
     opt.value = i;
-    opt.textContent = `第${i}課`;
+    if (i >= PREMIUM_LESSON_MIN && !state.premiumUnlocked) {
+      opt.textContent = `第${i}課 🔒 高级`;
+    } else if (i >= PREMIUM_LESSON_MIN) {
+      opt.textContent = `第${i}課 ⭐ 高级`;
+    } else {
+      opt.textContent = `第${i}課`;
+    }
     sel.appendChild(opt);
   }
+}
+
+function canAccessLesson(lessonNo) {
+  return lessonNo <= FREE_LESSON_MAX || !!state.premiumUnlocked;
+}
+
+function normalizeRedeemCode(raw) {
+  return String(raw || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+}
+
+function formatRedeemCode(codeRaw) {
+  const s = normalizeRedeemCode(codeRaw);
+  if (!s) return '';
+  return s.match(/.{1,4}/g).join('-');
+}
+
+function buildRandomRedeemCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let out = '';
+  for (let i = 0; i < 12; i++) {
+    out += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return out;
+}
+
+function renderAdminRedeemCodeInfo(latestCode = '') {
+  const input = document.getElementById('adminRedeemLatestCode');
+  const meta = document.getElementById('adminRedeemMeta');
+  if (input) input.value = latestCode ? formatRedeemCode(latestCode) : '';
+  if (meta) {
+    const total = Object.keys(premiumCodeStore || {}).length;
+    const used = Object.values(premiumCodeStore || {}).filter((x) => x && x.used).length;
+    meta.textContent = `累计生成 ${total} 个兑换码，已使用 ${used} 个。`;
+  }
+}
+
+function generatePremiumRedeemCode() {
+  let code = '';
+  for (let i = 0; i < 24; i++) {
+    const candidate = buildRandomRedeemCode();
+    if (!premiumCodeStore[candidate]) {
+      code = candidate;
+      break;
+    }
+  }
+  if (!code) {
+    showToast('⚠️ 兑换码生成失败，请重试');
+    return;
+  }
+  premiumCodeStore[code] = {
+    used: false,
+    createdAt: Date.now()
+  };
+  savePremiumCodeStore();
+  renderAdminRedeemCodeInfo(code);
+  showToast(`🎟 已生成兑换码：${formatRedeemCode(code)}`);
+}
+
+function copyAdminRedeemCode() {
+  const input = document.getElementById('adminRedeemLatestCode');
+  if (!input || !input.value) {
+    showToast('⚠️ 暂无可复制的兑换码');
+    return;
+  }
+  const text = input.value;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast('✅ 已复制兑换码');
+    }).catch(() => {
+      showToast('⚠️ 复制失败，请手动复制');
+    });
+    return;
+  }
+  try {
+    input.select();
+    document.execCommand('copy');
+    showToast('✅ 已复制兑换码');
+  } catch (_) {
+    showToast('⚠️ 复制失败，请手动复制');
+  }
+}
+
+function updatePremiumModalStatus(msg = '', type = '') {
+  const status = document.getElementById('premiumRedeemStatus');
+  if (!status) return;
+  status.className = `premium-redeem-status${type ? ` ${type}` : ''}`;
+  if (state.premiumUnlocked) {
+    status.textContent = '✅ 当前设备已永久解锁第28-48課。';
+    return;
+  }
+  status.textContent = msg;
+}
+
+function setPremiumUnlocked() {
+  state.premiumUnlocked = true;
+  saveState();
+  buildLessonSelect();
+  const lessonSelect = document.getElementById('lessonSelect');
+  if (lessonSelect) lessonSelect.value = state.currentLesson;
+  updatePremiumModalStatus('兑换成功，已永久解锁。', 'ok');
+}
+
+function onPremiumRedeemKeydown(e) {
+  if (e && e.key === 'Enter') redeemPremiumCode();
+}
+
+function redeemPremiumCode() {
+  const input = document.getElementById('premiumRedeemInput');
+  if (!input) return;
+  if (state.premiumUnlocked) {
+    updatePremiumModalStatus('✅ 已解锁，无需重复兑换。', 'ok');
+    return;
+  }
+  const normalized = normalizeRedeemCode(input.value || '');
+  if (!normalized) {
+    updatePremiumModalStatus('请输入兑换码。', 'err');
+    return;
+  }
+  const item = premiumCodeStore[normalized];
+  if (!item) {
+    updatePremiumModalStatus('兑换码无效，请确认后重试。', 'err');
+    return;
+  }
+  if (item.used) {
+    updatePremiumModalStatus('该兑换码已使用，请联系管理员。', 'err');
+    return;
+  }
+  item.used = true;
+  item.usedAt = Date.now();
+  premiumCodeStore[normalized] = item;
+  savePremiumCodeStore();
+  renderAdminRedeemCodeInfo();
+  setPremiumUnlocked();
+  showToast('✅ 兑换成功，已永久解锁第28-48課');
+  const target = pendingPremiumLessonNo;
+  pendingPremiumLessonNo = 0;
+  if (target >= PREMIUM_LESSON_MIN) {
+    changeLesson(target);
+  } else {
+    closePremiumModal();
+  }
+}
+
+function showPremiumModal(targetLesson) {
+  const modal = document.getElementById('premiumModal');
+  const hint = document.getElementById('premiumLessonHint');
+  const input = document.getElementById('premiumRedeemInput');
+  if (hint) hint.textContent = `第${targetLesson}課为高级功能，当前仅免费开放第${LESSON_MIN}-${FREE_LESSON_MAX}課。`;
+  if (input) input.value = '';
+  pendingPremiumLessonNo = Number(targetLesson) || 0;
+  updatePremiumModalStatus();
+  if (modal) modal.classList.add('show');
+}
+
+function closePremiumModal() {
+  const modal = document.getElementById('premiumModal');
+  pendingPremiumLessonNo = 0;
+  if (modal) modal.classList.remove('show');
+}
+
+function onPremiumOverlayClick(e) {
+  if (e && e.target && e.target.id === 'premiumModal') closePremiumModal();
 }
 
 function getPreferredJapaneseVoice(voices) {
@@ -6672,10 +7035,16 @@ function nextLesson() {
 
 function changeLesson(val) {
   const lessonNo = clampLessonNo(val);
+  if (!canAccessLesson(lessonNo)) {
+    document.getElementById('lessonSelect').value = state.currentLesson;
+    showPremiumModal(lessonNo);
+    return;
+  }
   state.currentLesson = lessonNo;
   document.getElementById('lessonSelect').value = lessonNo;
   state.currentSentenceIdx = 0;
   state.wrongOnly = false;
+  closePremiumModal();
   const wrongBtn = document.getElementById('wrongOnlyBtn');
   if (wrongBtn) {
     wrongBtn.textContent = '❌ 只练错题';
