@@ -3829,22 +3829,25 @@ function redeemPremiumCode() {
     updatePremiumModalStatus('兑换码无效，请确认后重试。', 'err');
     return;
   }
-  const item = premiumCodeStore[normalized];
-  if (!item) {
-    updatePremiumModalStatus('该兑换码未生成，请联系管理员。', 'err');
-    return;
-  }
-  if (item.used) {
+  if (premiumRedeemedStore[normalized]) {
     updatePremiumModalStatus('该兑换码已使用，请联系管理员。', 'err');
     return;
   }
-  item.used = true;
-  item.usedAt = Date.now();
-  premiumCodeStore[normalized] = item;
+  const nowTs = Date.now();
+  const item = premiumCodeStore[normalized];
+  if (item && item.used) {
+    updatePremiumModalStatus('该兑换码已使用，请联系管理员。', 'err');
+    return;
+  }
+  if (item && typeof item === 'object') {
+    item.used = true;
+    item.usedAt = nowTs;
+    premiumCodeStore[normalized] = item;
+  }
   savePremiumCodeStore();
   renderAdminRedeemCodeInfo();
   premiumRedeemedStore[normalized] = {
-    usedAt: item.usedAt
+    usedAt: (item && item.usedAt) ? item.usedAt : nowTs
   };
   savePremiumRedeemedStore();
   setPremiumUnlocked();
