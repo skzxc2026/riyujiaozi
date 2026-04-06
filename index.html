@@ -1102,6 +1102,81 @@
     color: #64748b;
     line-height: 1.45;
   }
+  .premium-code-history {
+    margin-top: 6px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #f8fafc;
+    max-height: 240px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .premium-code-empty {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    text-align: center;
+    padding: 10px 6px;
+  }
+  .premium-code-item {
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    border-radius: 8px;
+    padding: 6px 8px;
+  }
+  .premium-code-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .premium-code-value {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #1e293b;
+    letter-spacing: 0.05em;
+  }
+  .premium-code-state {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: #eef2ff;
+    color: #3730a3;
+    flex-shrink: 0;
+  }
+  .premium-code-state.used {
+    background: #dcfce7;
+    color: #166534;
+  }
+  .premium-code-meta {
+    margin-top: 4px;
+    font-size: 0.7rem;
+    color: #64748b;
+    line-height: 1.45;
+  }
+  .premium-code-actions {
+    margin-top: 6px;
+    display: flex;
+    gap: 6px;
+  }
+  .premium-code-action-btn {
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    color: #334155;
+    border-radius: 7px;
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    cursor: pointer;
+  }
+  .premium-code-action-btn.danger {
+    border-color: #fecaca;
+    color: #b91c1c;
+    background: #fff1f2;
+  }
 
   /* ===== Responsive ===== */
   @media (max-width: 900px) {
@@ -1469,6 +1544,7 @@
               <button class="btn btn-secondary btn-sm" onclick="copyAdminRedeemCode()">复制</button>
             </div>
             <div class="premium-admin-meta" id="adminRedeemMeta">尚未生成兑换码。</div>
+            <div class="premium-code-history" id="adminRedeemHistory"></div>
           </div>
           <div class="control-row" style="margin-top:8px; margin-bottom:0;">
             <span class="control-label">第25课6-13句优先TTS</span>
@@ -3383,6 +3459,22 @@ function savePremiumRedeemedStore() {
   } catch (_) {}
 }
 
+function mergePremiumRedeemUsage() {
+  let dirty = false;
+  const redeemed = premiumRedeemedStore || {};
+  Object.keys(redeemed).forEach((code) => {
+    const item = premiumCodeStore && premiumCodeStore[code];
+    if (!item || typeof item !== 'object') return;
+    if (item.used) return;
+    const usedAt = Number((redeemed[code] && redeemed[code].usedAt) || Date.now());
+    item.used = true;
+    item.usedAt = usedAt;
+    premiumCodeStore[code] = item;
+    dirty = true;
+  });
+  if (dirty) savePremiumCodeStore();
+}
+
 function getLessonProgress(lessonId) {
   return state.progress[lessonId] || {};
 }
@@ -3400,6 +3492,7 @@ function setSentenceStatus(lessonId, sentenceId, status) {
 loadState();
 loadPremiumCodeStore();
 loadPremiumRedeemedStore();
+mergePremiumRedeemUsage();
 loadTTSConfig();
 
 let layoutHeightObserver = null;
@@ -3533,6 +3626,65 @@ function isValidSignedRedeemCode(codeRaw) {
   return sign === calcPremiumCodeSign(payload);
 }
 
+function formatAdminTime(ts) {
+  const n = Number(ts || 0);
+  if (!n) return '-';
+  const d = new Date(n);
+  if (Number.isNaN(d.getTime())) return '-';
+  const pad = (x) => String(x).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
+function escapeHTML(raw) {
+  return String(raw || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function renderPremiumCodeHistory() {
+  const box = document.getElementById('adminRedeemHistory');
+  if (!box) return;
+  const entries = Object.entries(premiumCodeStore || {})
+    .map(([code, item]) => {
+      const info = (item && typeof item === 'object') ? item : {};
+      return {
+        code,
+        createdAt: Number(info.createdAt || 0),
+        used: !!info.used,
+        usedAt: Number(info.usedAt || 0)
+      };
+    })
+    .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  if (!entries.length) {
+    box.innerHTML = '<div class="premium-code-empty">暂无历史兑换码记录</div>';
+    return;
+  }
+  box.innerHTML = entries.map((row) => {
+    const safeCode = escapeHTML(row.code);
+    const createdText = escapeHTML(formatAdminTime(row.createdAt));
+    const usedText = row.used ? escapeHTML(formatAdminTime(row.usedAt)) : '-';
+    const stateClass = row.used ? 'premium-code-state used' : 'premium-code-state';
+    const stateText = row.used ? '已使用' : '未使用';
+    return `
+      <div class="premium-code-item">
+        <div class="premium-code-head">
+          <div class="premium-code-value">${escapeHTML(formatRedeemCode(row.code))}</div>
+          <span class="${stateClass}">${stateText}</span>
+        </div>
+        <div class="premium-code-meta">生成时间：${createdText}</div>
+        <div class="premium-code-meta">使用时间：${usedText}</div>
+        <div class="premium-code-actions">
+          <button class="premium-code-action-btn" onclick="copyPremiumCodeByValue('${safeCode}')">复制</button>
+          <button class="premium-code-action-btn danger" onclick="deletePremiumCodeByValue('${safeCode}')">删除</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
 function renderAdminRedeemCodeInfo(latestCode = '') {
   const input = document.getElementById('adminRedeemLatestCode');
   const meta = document.getElementById('adminRedeemMeta');
@@ -3542,6 +3694,7 @@ function renderAdminRedeemCodeInfo(latestCode = '') {
     const used = Object.values(premiumCodeStore || {}).filter((x) => x && x.used).length;
     meta.textContent = `累计生成 ${total} 个兑换码，已使用 ${used} 个。`;
   }
+  renderPremiumCodeHistory();
 }
 
 function generatePremiumRedeemCode() {
@@ -3590,6 +3743,52 @@ function copyAdminRedeemCode() {
   }
 }
 
+function copyPremiumCodeByValue(codeRaw) {
+  const normalized = normalizeRedeemCode(codeRaw);
+  if (!normalized) {
+    showToast('⚠️ 兑换码为空，无法复制');
+    return;
+  }
+  const text = formatRedeemCode(normalized);
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast('✅ 已复制兑换码');
+    }).catch(() => {
+      showToast('⚠️ 复制失败，请手动复制');
+    });
+    return;
+  }
+  try {
+    const input = document.getElementById('adminRedeemLatestCode');
+    if (input) {
+      input.value = text;
+      input.select();
+      document.execCommand('copy');
+      showToast('✅ 已复制兑换码');
+      return;
+    }
+  } catch (_) {}
+  showToast('⚠️ 复制失败，请手动复制');
+}
+
+function deletePremiumCodeByValue(codeRaw) {
+  const normalized = normalizeRedeemCode(codeRaw);
+  if (!normalized || !premiumCodeStore[normalized]) {
+    showToast('⚠️ 未找到该兑换码');
+    return;
+  }
+  delete premiumCodeStore[normalized];
+  delete premiumRedeemedStore[normalized];
+  savePremiumCodeStore();
+  savePremiumRedeemedStore();
+  const latestInput = document.getElementById('adminRedeemLatestCode');
+  if (latestInput && normalizeRedeemCode(latestInput.value) === normalized) {
+    latestInput.value = '';
+  }
+  renderAdminRedeemCodeInfo();
+  showToast('🗑️ 已删除兑换码记录');
+}
+
 function updatePremiumModalStatus(msg = '', type = '') {
   const status = document.getElementById('premiumRedeemStatus');
   if (!status) return;
@@ -3630,8 +3829,22 @@ function redeemPremiumCode() {
     updatePremiumModalStatus('兑换码无效，请确认后重试。', 'err');
     return;
   }
+  const item = premiumCodeStore[normalized];
+  if (!item) {
+    updatePremiumModalStatus('该兑换码未生成，请联系管理员。', 'err');
+    return;
+  }
+  if (item.used) {
+    updatePremiumModalStatus('该兑换码已使用，请联系管理员。', 'err');
+    return;
+  }
+  item.used = true;
+  item.usedAt = Date.now();
+  premiumCodeStore[normalized] = item;
+  savePremiumCodeStore();
+  renderAdminRedeemCodeInfo();
   premiumRedeemedStore[normalized] = {
-    usedAt: Date.now()
+    usedAt: item.usedAt
   };
   savePremiumRedeemedStore();
   setPremiumUnlocked();
