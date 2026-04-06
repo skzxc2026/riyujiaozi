@@ -1607,6 +1607,8 @@ const LESSON_MAX = 48;
 const FREE_LESSON_MAX = 27;
 const PREMIUM_LESSON_MIN = 28;
 const PREMIUM_CODE_STORE_KEY = 'jpPremiumRedeemCodesV1';
+const PREMIUM_REDEEMED_STORE_KEY = 'jpPremiumRedeemedCodesV1';
+const PREMIUM_REDEEM_SECRET = 'SKZXC-NLPT-2026';
 const LESSON_AUDIO_DIR = './标日教资逐字稿录音25-48课【手可摘星辰】';
 const LESSON_AUDIO_FILES = {
   25: '标日教资逐字稿--第25课.mp3',
@@ -3257,6 +3259,7 @@ let ttsVoiceRefreshCount = 0;
 let browserTTSPlaybackToken = 0;
 let browserTTSHighlightTimer = 0;
 let premiumCodeStore = {};
+let premiumRedeemedStore = {};
 let pendingPremiumLessonNo = 0;
 
 function clampLessonNo(val) {
@@ -3362,6 +3365,24 @@ function savePremiumCodeStore() {
   } catch (_) {}
 }
 
+function loadPremiumRedeemedStore() {
+  premiumRedeemedStore = {};
+  try {
+    const raw = localStorage.getItem(PREMIUM_REDEEMED_STORE_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw) || {};
+    if (parsed && typeof parsed === 'object') premiumRedeemedStore = parsed;
+  } catch (_) {
+    premiumRedeemedStore = {};
+  }
+}
+
+function savePremiumRedeemedStore() {
+  try {
+    localStorage.setItem(PREMIUM_REDEEMED_STORE_KEY, JSON.stringify(premiumRedeemedStore || {}));
+  } catch (_) {}
+}
+
 function getLessonProgress(lessonId) {
   return state.progress[lessonId] || {};
 }
@@ -3378,6 +3399,7 @@ function setSentenceStatus(lessonId, sentenceId, status) {
 // =============================================
 loadState();
 loadPremiumCodeStore();
+loadPremiumRedeemedStore();
 loadTTSConfig();
 
 let layoutHeightObserver = null;
@@ -3482,10 +3504,33 @@ function formatRedeemCode(codeRaw) {
 function buildRandomRedeemCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let out = '';
-  for (let i = 0; i < 12; i++) {
+  for (let i = 0; i < 10; i++) {
     out += chars[Math.floor(Math.random() * chars.length)];
   }
   return out;
+}
+
+function calcPremiumCodeSign(payload) {
+  const src = `${String(payload || '')}|${PREMIUM_REDEEM_SECRET}`;
+  let hash = 2166136261 >>> 0;
+  for (let i = 0; i < src.length; i++) {
+    hash ^= src.charCodeAt(i);
+    hash = Math.imul(hash, 16777619) >>> 0;
+  }
+  return hash.toString(36).toUpperCase().replace(/[^A-Z0-9]/g, '').padStart(6, '0').slice(0, 6);
+}
+
+function buildSignedRedeemCode() {
+  const payload = buildRandomRedeemCode();
+  return payload + calcPremiumCodeSign(payload);
+}
+
+function isValidSignedRedeemCode(codeRaw) {
+  const code = normalizeRedeemCode(codeRaw);
+  if (code.length !== 16) return false;
+  const payload = code.slice(0, 10);
+  const sign = code.slice(10);
+  return sign === calcPremiumCodeSign(payload);
 }
 
 function renderAdminRedeemCodeInfo(latestCode = '') {
@@ -3502,7 +3547,7 @@ function renderAdminRedeemCodeInfo(latestCode = '') {
 function generatePremiumRedeemCode() {
   let code = '';
   for (let i = 0; i < 24; i++) {
-    const candidate = buildRandomRedeemCode();
+    const candidate = buildSignedRedeemCode();
     if (!premiumCodeStore[candidate]) {
       code = candidate;
       break;
@@ -3581,20 +3626,14 @@ function redeemPremiumCode() {
     updatePremiumModalStatus('请输入兑换码。', 'err');
     return;
   }
-  const item = premiumCodeStore[normalized];
-  if (!item) {
+  if (!isValidSignedRedeemCode(normalized)) {
     updatePremiumModalStatus('兑换码无效，请确认后重试。', 'err');
     return;
   }
-  if (item.used) {
-    updatePremiumModalStatus('该兑换码已使用，请联系管理员。', 'err');
-    return;
-  }
-  item.used = true;
-  item.usedAt = Date.now();
-  premiumCodeStore[normalized] = item;
-  savePremiumCodeStore();
-  renderAdminRedeemCodeInfo();
+  premiumRedeemedStore[normalized] = {
+    usedAt: Date.now()
+  };
+  savePremiumRedeemedStore();
   setPremiumUnlocked();
   showToast('✅ 兑换成功，已永久解锁第28-48課');
   const target = pendingPremiumLessonNo;
